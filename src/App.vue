@@ -9,6 +9,7 @@ const menuItems = [
   { key: 'pay', title: '代收下单' },
   { key: 'transfer', title: '代付下单' },
   { key: 'query', title: '订单查询' },
+  { key: 'telegram', title: 'Telegram机器人' },
 ]
 
 function scrollToSection(key) {
@@ -900,6 +901,135 @@ $jsonData = json_encode($params);
   }
 }</code></pre>
             </div>
+          </div>
+        </div>
+
+        <!-- Telegram机器人 -->
+        <div id="telegram" class="section">
+          <div class="content-header">
+            <h2>Telegram 机器人</h2>
+            <p>DCPAY 提供 Telegram 机器人服务，方便商户实时查询账户信息和订单状态。</p>
+          </div>
+
+          <div class="card">
+            <h3>机器人信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>机器人名称</td>
+                  <td>DCPay小助手</td>
+                </tr>
+                <tr>
+                  <td>机器人账号</td>
+                  <td><a href="https://t.me/DCPaySupportBot" target="_blank">@DCPaySupportBot</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>使用步骤</h3>
+            <ol>
+              <li>商户接入过程中，管理员会将 <code>@DCPaySupportBot</code> 拉入商户专属讨论组</li>
+              <li>使用 <code>/bd 商户号</code> 命令绑定您的商户账号</li>
+              <li>绑定成功后即可使用其他命令查询信息</li>
+            </ol>
+          </div>
+
+          <div class="card">
+            <h3>命令列表</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>命令</th>
+                  <th>说明</th>
+                  <th>示例</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>/bd 商户号</code></td>
+                  <td>绑定商户账号，首次使用必须先绑定</td>
+                  <td><code>/bd DC1010</code></td>
+                </tr>
+                <tr>
+                  <td><code>ye</code></td>
+                  <td>查询商户余额，显示可提现余额、待结算余额等信息</td>
+                  <td><code>ye</code></td>
+                </tr>
+                <tr>
+                  <td><code>success</code></td>
+                  <td>查询商户成功率，显示不同时间段（5分钟、10分钟、30分钟、1小时、2小时）的代收和代付成功率</td>
+                  <td><code>success</code></td>
+                </tr>
+                <tr>
+                  <td><code>ds 订单号</code></td>
+                  <td>查询代收订单详情，显示订单金额、状态、创建时间等信息</td>
+                  <td><code>ds DCP202603010001</code></td>
+                </tr>
+                <tr>
+                  <td><code>df 订单号</code></td>
+                  <td>查询代付订单详情，显示订单金额、状态、创建时间等信息</td>
+                  <td><code>df DCDEV_T202603010001</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>命令详情</h3>
+            
+            <h4>绑定商户</h4>
+            <p>首次使用机器人需要绑定商户账号，绑定后才能使用其他查询命令。</p>
+            <div class="code-block">
+              <pre><code>/bd DC1010</code></pre>
+            </div>
+            <p>绑定成功后会显示商户号和商户名称。</p>
+
+            <h4>查询余额</h4>
+            <p>查询当前绑定商户的余额信息，包括：</p>
+            <ul>
+              <li>可提现余额</li>
+              <li>待结算余额</li>
+              <li>代付冻结金额</li>
+              <li>提现冻结金额</li>
+            </ul>
+            <div class="code-block">
+              <pre><code>ye</code></pre>
+            </div>
+
+            <h4>查询成功率</h4>
+            <p>查询不同时间段的代收和代付成功率，时间段包括：5分钟、10分钟、30分钟、1小时、2小时。</p>
+            <div class="code-block">
+              <pre><code>success</code></pre>
+            </div>
+
+            <h4>查询代收订单</h4>
+            <p>根据订单号查询代收订单详情，显示订单金额、状态、创建时间、完成时间等信息。</p>
+            <div class="code-block">
+              <pre><code>ds DCP202603010001</code></pre>
+            </div>
+
+            <h4>查询代付订单</h4>
+            <p>根据订单号查询代付订单详情，显示订单金额、状态、创建时间、完成时间等信息。</p>
+            <div class="code-block">
+              <pre><code>df DCDEV_T202603010001</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>注意事项</h3>
+            <ul>
+              <li>每个 Telegram 账号只能绑定一个商户</li>
+              <li>订单查询仅支持查询绑定商户的订单</li>
+              <li>如有问题请联系技术支持：<a href="https://t.me/feileabc" target="_blank">@feileabc</a></li>
+            </ul>
           </div>
         </div>
       </section>
