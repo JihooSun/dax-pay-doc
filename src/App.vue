@@ -9,6 +9,7 @@ const menuItems = [
   { key: 'pay', title: '代收下单' },
   { key: 'transfer', title: '代付下单' },
   { key: 'query', title: '订单查询' },
+  { key: 'balance', title: '商户余额查询' },
   { key: 'telegram', title: 'Telegram机器人' },
 ]
 
@@ -444,6 +445,18 @@ $jsonData = json_encode($params);
                   <td>货币代码，如 INR（印度卢比）</td>
                 </tr>
                 <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
                   <td><code>title</code></td>
                   <td>String</td>
                   <td>否</td>
@@ -479,18 +492,6 @@ $jsonData = json_encode($params);
                   <td>否</td>
                   <td>扩展参数，最大2048位</td>
                 </tr>
-                <tr>
-                  <td><code>reqTime</code></td>
-                  <td>Long</td>
-                  <td>是</td>
-                  <td>请求时间，13位时间戳（毫秒）</td>
-                </tr>
-                <tr>
-                  <td><code>sign</code></td>
-                  <td>String</td>
-                  <td>是</td>
-                  <td>签名值，使用 RSA2 签名</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -503,12 +504,12 @@ $jsonData = json_encode($params);
   "bizOrderNo": "ORDER_20260301001",
   "amount": 100.00,
   "currency": "INR",
+  "reqTime": 1704067200000,
+  "sign": "K2Jx8vM3nQ...",
   "title": "测试订单",
   "clientIp": "127.0.0.1",
   "notifyUrl": "https://example.com/notify",
-  "returnUrl": "https://example.com/return",
-  "reqTime": 1704067200000,
-  "sign": "K2Jx8vM3nQ..."
+  "returnUrl": "https://example.com/return"
 }</code></pre>
             </div>
           </div>
@@ -608,7 +609,6 @@ $jsonData = json_encode($params);
 
           <div class="card">
             <h3>请求参数</h3>
-            <p>继承代收下单所有参数，额外增加以下参数：</p>
             <table class="api-table">
               <thead>
                 <tr>
@@ -619,6 +619,78 @@ $jsonData = json_encode($params);
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>支付金额，精度到分，最小0.01</td>
+                </tr>
+                <tr>
+                  <td><code>currency</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>货币代码，如 INR（印度卢比）</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，支付结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>returnUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>同步跳转地址，支付完成后跳转的页面</td>
+                </tr>
+                <tr>
+                  <td><code>expiredTime</code></td>
+                  <td>Long</td>
+                  <td>否</td>
+                  <td>订单过期时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，最大2048位</td>
+                </tr>
                 <tr>
                   <td><code>bankName</code></td>
                   <td>String</td>
@@ -685,6 +757,8 @@ $jsonData = json_encode($params);
   "bizOrderNo": "TRANSFER_20260301001",
   "amount": 1000.00,
   "currency": "INR",
+  "reqTime": 1704067200000,
+  "sign": "K2Jx8vM3nQ...",
   "title": "代付转账",
   "clientIp": "127.0.0.1",
   "notifyUrl": "https://example.com/transfer/notify",
@@ -693,9 +767,7 @@ $jsonData = json_encode($params);
   "accountNo": "1234567890123456",
   "accountName": "John Doe",
   "ifscCode": "SBIN0001234",
-  "transferMode": "IMPS",
-  "reqTime": 1704067200000,
-  "sign": "K2Jx8vM3nQ..."
+  "transferMode": "IMPS"
 }</code></pre>
             </div>
           </div>
@@ -772,6 +844,18 @@ $jsonData = json_encode($params);
                   <td>商户号</td>
                 </tr>
                 <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值</td>
+                </tr>
+                <tr>
                   <td><code>queryType</code></td>
                   <td>String</td>
                   <td>否</td>
@@ -789,18 +873,6 @@ $jsonData = json_encode($params);
                   <td>否</td>
                   <td>DCPAY 订单号，与 bizOrderNo 二选一</td>
                 </tr>
-                <tr>
-                  <td><code>reqTime</code></td>
-                  <td>Long</td>
-                  <td>是</td>
-                  <td>请求时间，13位时间戳（毫秒）</td>
-                </tr>
-                <tr>
-                  <td><code>sign</code></td>
-                  <td>String</td>
-                  <td>是</td>
-                  <td>签名值</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -810,10 +882,10 @@ $jsonData = json_encode($params);
             <div class="code-block">
               <pre><code>{
   "mchNo": "DC1010",
-  "queryType": "1",
-  "bizOrderNo": "ORDER_20260301001",
   "reqTime": 1704067200000,
-  "sign": "K2Jx8vM3nQ..."
+  "sign": "K2Jx8vM3nQ...",
+  "queryType": "1",
+  "bizOrderNo": "ORDER_20260301001"
 }</code></pre>
             </div>
           </div>
@@ -904,6 +976,170 @@ $jsonData = json_encode($params);
           </div>
         </div>
 
+        <!-- 商户余额查询 -->
+        <div id="balance" class="section">
+          <div class="content-header">
+            <h2>商户余额查询</h2>
+            <p>查询商户账户余额信息接口，可查询可用余额、待结算余额、冻结余额等。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/queryBalance</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1010",
+  "reqTime": 1704067200000,
+  "sign": "K2Jx8vM3nQ...",
+  "clientIp": "127.0.0.1"
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>返回参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>withdrawableAmount</code></td>
+                  <td>Long</td>
+                  <td>可提现余额（分）</td>
+                </tr>
+                <tr>
+                  <td><code>pendingAmount</code></td>
+                  <td>Long</td>
+                  <td>待结算余额（分）</td>
+                </tr>
+                <tr>
+                  <td><code>payoutFrozenAmount</code></td>
+                  <td>Long</td>
+                  <td>代付冻结余额（分）</td>
+                </tr>
+                <tr>
+                  <td><code>withdrawFrozenAmount</code></td>
+                  <td>Long</td>
+                  <td>提现冻结余额（分）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>余额类型说明</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>余额类型</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>可提现余额</code></td>
+                  <td>商户可申请提现的余额，已结算完成</td>
+                </tr>
+                <tr>
+                  <td><code>待结算余额</code></td>
+                  <td>订单已完成但尚未结算的余额，需等待结算周期</td>
+                </tr>
+                <tr>
+                  <td><code>代付冻结余额</code></td>
+                  <td>代付订单处理中冻结的余额，订单完成后解冻</td>
+                </tr>
+                <tr>
+                  <td><code>提现冻结余额</code></td>
+                  <td>提现申请处理中冻结的余额，提现完成后扣除</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "withdrawableAmount": 1000000,
+    "pendingAmount": 500000,
+    "payoutFrozenAmount": 200000,
+    "withdrawFrozenAmount": 100000
+  }
+}</code></pre>
+            </div>
+            <p style="margin-top: 12px;"><strong>说明：</strong>以上金额单位为分，例如 <code>withdrawableAmount: 1000000</code> 表示可提现余额为 10000.00 元。</p>
+          </div>
+        </div>
+
         <!-- Telegram机器人 -->
         <div id="telegram" class="section">
           <div class="content-header">
@@ -947,9 +1183,9 @@ $jsonData = json_encode($params);
             <table class="api-table">
               <thead>
                 <tr>
-                  <th>命令</th>
+                  <th style="width: 150px;">命令</th>
                   <th>说明</th>
-                  <th>示例</th>
+                  <th style="width: 180px;">示例</th>
                 </tr>
               </thead>
               <tbody>
