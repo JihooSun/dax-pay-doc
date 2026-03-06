@@ -10,6 +10,7 @@ const menuItems = [
   { key: 'transfer', title: '代付下单' },
   { key: 'query', title: '订单查询' },
   { key: 'balance', title: '商户余额查询' },
+  { key: 'errorcode', title: '错误码' },
   { key: 'telegram', title: 'Telegram机器人' },
 ]
 
@@ -1137,6 +1138,312 @@ $jsonData = json_encode($params);
 }</code></pre>
             </div>
             <p style="margin-top: 12px;"><strong>说明：</strong>以上金额单位为分，例如 <code>withdrawableAmount: 1000000</code> 表示可提现余额为 10000.00 元。</p>
+          </div>
+        </div>
+
+        <!-- 错误码 -->
+        <div id="errorcode" class="section">
+          <div class="content-header">
+            <h2>错误码</h2>
+            <p>API 接口返回的错误码及错误信息说明，方便商户进行错误处理。</p>
+          </div>
+
+          <div class="card">
+            <h3>错误码规范</h3>
+            <p>API 返回格式：</p>
+            <div class="code-block">
+              <pre><code>{
+  "code": 20011,
+  "msg": "Merchant payment channel not configured"
+}</code></pre>
+            </div>
+            <p style="margin-top: 12px;"><strong>说明：</strong><code>code</code> 为 0 表示成功，非 0 表示失败。失败时 <code>msg</code> 会返回具体的错误信息。</p>
+          </div>
+
+          <div class="card">
+            <h3>代收下单错误码</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">错误码</th>
+                  <th style="width: 320px;">错误信息</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>Merchant payment channel not configured</td>
+                  <td>商户未配置支付通道，请联系运营人员配置</td>
+                </tr>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>Payment channel not enabled: xxx</td>
+                  <td>支付通道未启用，请联系运营人员开启</td>
+                </tr>
+                <tr>
+                  <td><code>20043</code></td>
+                  <td>Payment is in progress, please do not repeat</td>
+                  <td>支付处理中，请勿重复提交</td>
+                </tr>
+                <tr>
+                  <td><code>20044</code></td>
+                  <td>Payment timeout, please confirm payment status</td>
+                  <td>支付已超时，请重新确认支付状态</td>
+                </tr>
+                <tr>
+                  <td><code>20044</code></td>
+                  <td>Order number duplicate, please initiate payment again</td>
+                  <td>订单号重复，请重新发起支付</td>
+                </tr>
+                <tr>
+                  <td><code>20044</code></td>
+                  <td>Payment already successful, please do not pay again</td>
+                  <td>已经支付成功，请勿重复支付</td>
+                </tr>
+                <tr>
+                  <td><code>20044</code></td>
+                  <td>Order payment failed or has been closed</td>
+                  <td>该订单支付失败或已被关闭</td>
+                </tr>
+                <tr>
+                  <td><code>20044</code></td>
+                  <td>Order is not in pending payment status, please confirm order status</td>
+                  <td>订单不是待支付状态，请确认订单状态</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>Channel configuration not found</td>
+                  <td>通道配置不存在，请联系运营人员</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>Payment amount below minimum limit</td>
+                  <td>支付金额低于最低限额</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>Payment amount exceeds maximum limit</td>
+                  <td>支付金额超过最高限额</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>代付下单错误码</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">错误码</th>
+                  <th style="width: 320px;">错误信息</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>Merchant transfer channel not configured</td>
+                  <td>商户未配置代付通道，请联系运营人员配置</td>
+                </tr>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>Transfer channel not enabled: xxx</td>
+                  <td>代付通道未启用，请联系运营人员开启</td>
+                </tr>
+                <tr>
+                  <td><code>20043</code></td>
+                  <td>Transfer in progress, please do not repeat</td>
+                  <td>转账处理中，请勿重复提交</td>
+                </tr>
+                <tr>
+                  <td><code>20044</code></td>
+                  <td>Order duplicate, please regenerate transfer</td>
+                  <td>订单重复，请重新生成代付订单</td>
+                </tr>
+                <tr>
+                  <td><code>20045</code></td>
+                  <td>Insufficient balance</td>
+                  <td>余额不足，请充值后重试</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>Transfer amount below minimum limit</td>
+                  <td>代付金额低于最低限额</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>Transfer amount exceeds maximum limit</td>
+                  <td>代付金额超过最高限额</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>订单查询错误码</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">错误码</th>
+                  <th style="width: 320px;">错误信息</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>Merchant payment channel not configured</td>
+                  <td>商户未配置支付通道</td>
+                </tr>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>Payment channel not enabled: xxx</td>
+                  <td>支付通道未启用</td>
+                </tr>
+                <tr>
+                  <td><code>20030</code></td>
+                  <td>Query type not supported</td>
+                  <td>查询类型不支持，请使用 1（代收）或 2（代付）</td>
+                </tr>
+                <tr>
+                  <td><code>20041</code></td>
+                  <td>Order not found</td>
+                  <td>订单不存在，请检查订单号是否正确</td>
+                </tr>
+                <tr>
+                  <td><code>20091</code></td>
+                  <td>Order query failed: xxx</td>
+                  <td>订单查询失败，具体原因见错误信息</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>商户余额查询错误码</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">错误码</th>
+                  <th style="width: 320px;">错误信息</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>20045</code></td>
+                  <td>Insufficient balance</td>
+                  <td>余额不足</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>通用错误码</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">错误码</th>
+                  <th style="width: 320px;">错误信息</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>20023</code></td>
+                  <td>配置未启用</td>
+                  <td>相关配置未启用，请联系运营人员</td>
+                </tr>
+                <tr>
+                  <td><code>20025</code></td>
+                  <td>配置不存在</td>
+                  <td>相关配置不存在，请联系运营人员</td>
+                </tr>
+                <tr>
+                  <td><code>20026</code></td>
+                  <td>商户不存在</td>
+                  <td>商户号不存在，请检查商户号是否正确</td>
+                </tr>
+                <tr>
+                  <td><code>20052</code></td>
+                  <td>验签失败</td>
+                  <td>签名验证失败，请检查签名算法和密钥是否正确</td>
+                </tr>
+                <tr>
+                  <td><code>30000</code></td>
+                  <td>System error</td>
+                  <td>系统未知错误，请联系技术支持</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>错误码总览</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">错误码</th>
+                  <th>错误类型</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>支付通道不存在</td>
+                </tr>
+                <tr>
+                  <td><code>20023</code></td>
+                  <td>配置未启用</td>
+                </tr>
+                <tr>
+                  <td><code>20025</code></td>
+                  <td>配置不存在</td>
+                </tr>
+                <tr>
+                  <td><code>20026</code></td>
+                  <td>商户不存在</td>
+                </tr>
+                <tr>
+                  <td><code>20030</code></td>
+                  <td>不支持该能力</td>
+                </tr>
+                <tr>
+                  <td><code>20041</code></td>
+                  <td>交易不存在</td>
+                </tr>
+                <tr>
+                  <td><code>20043</code></td>
+                  <td>交易处理中</td>
+                </tr>
+                <tr>
+                  <td><code>20044</code></td>
+                  <td>交易状态错误</td>
+                </tr>
+                <tr>
+                  <td><code>20045</code></td>
+                  <td>交易失败</td>
+                </tr>
+                <tr>
+                  <td><code>20052</code></td>
+                  <td>验签失败</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>金额超过限额</td>
+                </tr>
+                <tr>
+                  <td><code>20091</code></td>
+                  <td>数据错误</td>
+                </tr>
+                <tr>
+                  <td><code>30000</code></td>
+                  <td>系统未知错误</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
