@@ -11,6 +11,7 @@ const menuItems = [
   { key: 'query', title: '订单查询' },
   { key: 'balance', title: '商户余额查询' },
   { key: 'errorcode', title: '错误码' },
+  { key: 'download', title: '示例代码' },
   { key: 'telegram', title: 'Telegram机器人' },
 ]
 
@@ -18,7 +19,7 @@ function scrollToSection(key) {
   activeMenu.value = key
   const element = document.getElementById(key)
   if (element) {
-    const headerHeight = 64 // header高度
+    const headerHeight = 64
     const elementPosition = element.getBoundingClientRect().top
     const offsetPosition = elementPosition + window.pageYOffset - headerHeight
     window.scrollTo({
@@ -26,6 +27,15 @@ function scrollToSection(key) {
       behavior: 'smooth'
     })
   }
+}
+
+function downloadDemo() {
+  const link = document.createElement('a')
+  link.href = '/dcpayDemo.zip'
+  link.download = 'dcpayDemo.zip'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 </script>
 
@@ -156,7 +166,7 @@ function scrollToSection(key) {
             <p>将排序后的参数按照 <code>key1=value1&key2=value2&...</code> 格式拼接成字符串。</p>
             <div class="code-block">
               <pre><code>// 示例：待签名字符串
-amount=100.00&bizOrderNo=ORDER_001&clientIp=127.0.0.1&mchNo=M123456&reqTime=1704067200000</code></pre>
+amount=100&bizOrderNo=ORDER_001&clientIp=127.0.0.1&mchNo=M123456&reqTime=1704067200000</code></pre>
             </div>
 
             <h4>第三步：生成签名</h4>
@@ -170,7 +180,7 @@ amount=100.00&bizOrderNo=ORDER_001&clientIp=127.0.0.1&mchNo=M123456&reqTime=1704
             <div class="code-block">
               <pre><code>// 签名结果示例（Base64编码）
 // 原始待签名字符串：
-// amount=100.00&bizOrderNo=ORDER_001&clientIp=127.0.0.1&mchNo=M123456&reqTime=1704067200000
+// amount=100&bizOrderNo=ORDER_001&clientIp=127.0.0.1&mchNo=M123456&reqTime=1704067200000
 
 // 最终签名值（Base64编码）：
 // "K2Jx8vM3nQ7hR9sT..."</code></pre>
@@ -268,7 +278,7 @@ public class SignExample {
         Map&lt;String, String&gt; params = new TreeMap&lt;&gt;();
         params.put("mchNo", "M123456");
         params.put("bizOrderNo", "ORDER_001");
-        params.put("amount", "100.00");
+        params.put("amount", "100");
         params.put("clientIp", "127.0.0.1");
         params.put("reqTime", String.valueOf(System.currentTimeMillis()));
         
@@ -351,7 +361,7 @@ function buildSignString($params) {
 $params = [
     'mchNo' => 'M123456',
     'bizOrderNo' => 'ORDER_001',
-    'amount' => '100.00',
+    'amount' => '100',
     'clientIp' => '127.0.0.1',
     'reqTime' => round(microtime(true) * 1000)  // 13位时间戳
 ];
@@ -503,7 +513,7 @@ $jsonData = json_encode($params);
               <pre><code>{
   "mchNo": "DC1010",
   "bizOrderNo": "ORDER_20260301001",
-  "amount": 100.00,
+  "amount": 100,
   "currency": "INR",
   "reqTime": 1704067200000,
   "sign": "K2Jx8vM3nQ...",
@@ -572,7 +582,7 @@ $jsonData = json_encode($params);
     "status": "pending",
     "payData": "https://pay.dcpay.com/...",
     "extraParam": null,
-    "amount": 100.00
+    "amount": 100
   }
 }</code></pre>
             </div>
@@ -1444,6 +1454,65 @@ $jsonData = json_encode($params);
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- 示例代码 -->
+        <div id="download" class="section">
+          <div class="content-header">
+            <h2>示例代码</h2>
+            <p>DCPAY 提供完整的示例代码，帮助您快速集成 API 接口。</p>
+          </div>
+
+          <div class="card">
+            <h3>Java SDK 示例</h3>
+            <p>包含代收下单、代付下单、订单查询、余额查询等完整示例代码，支持 RSA2 签名验证。</p>
+            <div style="margin-top: 20px;">
+              <button class="download-btn" @click="downloadDemo">
+                <span style="margin-right: 8px;">📥</span> 下载示例代码 (dcpayDemo.zip)
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>示例代码说明</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>文件</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>TransferClient.java</code></td>
+                  <td>代付下单客户端示例</td>
+                </tr>
+                <tr>
+                  <td><code>TransferRequest.java</code></td>
+                  <td>代付请求参数封装</td>
+                </tr>
+                <tr>
+                  <td><code>TransferResponse.java</code></td>
+                  <td>代付响应结果封装</td>
+                </tr>
+                <tr>
+                  <td><code>TransferExample.java</code></td>
+                  <td>代付调用示例</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>使用说明</h3>
+            <ol>
+              <li>下载示例代码压缩包</li>
+              <li>解压后将代码导入您的项目中</li>
+              <li>修改商户号、私钥等配置信息</li>
+              <li>根据业务需求调整参数</li>
+              <li>运行测试验证接口调用</li>
+            </ol>
           </div>
         </div>
 
