@@ -1,7 +1,35 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const activeMenu = ref('welcome')
+
+let ticking = false
+
+function onScroll() {
+  if (ticking) return
+  ticking = true
+  requestAnimationFrame(() => {
+    const headerHeight = 64
+    const sections = document.querySelectorAll('.section')
+    let current = sections[0]?.id || 'welcome'
+    sections.forEach((section) => {
+      const top = section.getBoundingClientRect().top
+      if (top <= headerHeight + 10) {
+        current = section.id
+      }
+    })
+    activeMenu.value = current
+    ticking = false
+  })
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
+})
 
 const menuItems = [
   { key: 'welcome', title: '欢迎' },
@@ -10,6 +38,7 @@ const menuItems = [
   { key: 'transfer', title: '代付下单' },
   { key: 'query', title: '订单查询' },
   { key: 'balance', title: '商户余额查询' },
+  { key: 'notify', title: '回调通知' },
   { key: 'errorcode', title: '错误码' },
   { key: 'download', title: '示例代码' },
   { key: 'telegram', title: 'Telegram机器人' },
@@ -582,7 +611,7 @@ $jsonData = json_encode($params);
     "status": "pending",
     "payData": "https://pay.dcpay.com/...",
     "extraParam": null,
-    "amount": 100
+    "amount": "100"
   }
 }</code></pre>
             </div>
@@ -766,7 +795,7 @@ $jsonData = json_encode($params);
               <pre><code>{
   "mchNo": "DC1010",
   "bizOrderNo": "TRANSFER_20260301001",
-  "amount": 1000.00,
+  "amount": 1000,
   "currency": "INR",
   "reqTime": 1704067200000,
   "sign": "K2Jx8vM3nQ...",
@@ -800,7 +829,7 @@ $jsonData = json_encode($params);
     "status": "pending",
     "payData": null,
     "extraParam": null,
-    "amount": 1000.00
+    "amount": "1000"
   }
 }</code></pre>
             </div>
@@ -1140,14 +1169,303 @@ $jsonData = json_encode($params);
   "code": 0,
   "msg": "success",
   "data": {
-    "withdrawableAmount": 1000000,
-    "pendingAmount": 500000,
-    "payoutFrozenAmount": 200000,
-    "withdrawFrozenAmount": 100000
+    "withdrawableAmount": "1000000",
+    "pendingAmount": "500000",
+    "payoutFrozenAmount": "200000",
+    "withdrawFrozenAmount": "100000"
   }
 }</code></pre>
             </div>
             <p style="margin-top: 12px;"><strong>说明：</strong>以上金额单位为分，例如 <code>withdrawableAmount: 1000000</code> 表示可提现余额为 10000.00 元。</p>
+          </div>
+        </div>
+        <!-- 回调通知 -->
+        <div id="notify" class="section">
+          <div class="content-header">
+            <h2>回调通知</h2>
+            <p>当订单状态发生变化（支付成功、代付完成等）时，DCPAY 会向下单时填写的 <code>notifyUrl</code> 发送 GET 请求，通知商户处理业务逻辑。</p>
+          </div>
+
+          <div class="card">
+            <h3>通知说明</h3>
+            <ul>
+              <li>通知方式：<strong>HTTP GET</strong>，参数拼接在 URL 上</li>
+              <li>触发时机：订单状态变更时（如支付成功、代付完成）</li>
+              <li>重试机制：若商户未返回 <code>SUCCESS</code>，系统将按梯度间隔重试，最多重试 16 次</li>
+              <li>商户必须在 5 秒内响应，超时视为失败</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>回调参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必有</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号</td>
+                </tr>
+                <tr>
+                  <td><code>orderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>DCPAY 订单号</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>订单金额</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>订单状态（见下方状态说明）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用平台公钥验签</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>订单标题，下单时选填，未填则不返回</td>
+                </tr>
+                <tr>
+                  <td><code>payTime</code></td>
+                  <td>Long</td>
+                  <td>否</td>
+                  <td>支付/完成时间，13位时间戳（毫秒），订单未完成时不返回</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>订单状态说明</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>状态值</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>success</code></td>
+                  <td>成功</td>
+                </tr>
+                <tr>
+                  <td><code>fail</code></td>
+                  <td>失败</td>
+                </tr>
+                <tr>
+                  <td><code>closed</code></td>
+                  <td>已关闭</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>签名验证</h3>
+            <p>收到回调后，建议验证签名以确保通知来自 DCPAY，防止伪造请求。</p>
+            <ol>
+              <li>取出所有参数，去掉 <code>sign</code> 字段</li>
+              <li>过滤空值参数</li>
+              <li>按参数名 ASCII 升序排列，拼接为 <code>key=value&amp;key=value</code> 格式</li>
+              <li>使用<strong>平台公钥</strong>（从商户端设置页面获取）对签名字符串进行 RSA2 验签</li>
+            </ol>
+            <p>平台公钥请登录 <a href="https://admin.dcpay.me/" target="_blank">商户端</a> → 设置 页面获取。</p>
+          </div>
+
+          <div class="card">
+            <h3>响应要求</h3>
+            <p>商户处理完业务逻辑后，必须返回字符串 <code>SUCCESS</code>（不区分大小写），否则 DCPAY 会认为通知失败并重试。</p>
+            <div class="code-block">
+              <pre><code>SUCCESS</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>回调示例（Java）</h3>
+            <div class="code-block">
+              <pre><code>import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.security.*;
+import java.security.spec.*;
+import java.util.*;
+import java.nio.charset.StandardCharsets;
+
+@RestController
+@RequestMapping("/notify")
+public class NotifyController {
+
+    // 平台公钥（从商户端设置页面获取）
+    private static final String PLATFORM_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n" +
+        "您的平台公钥内容...\n" +
+        "-----END PUBLIC KEY-----";
+
+    @GetMapping
+    public String notify(@RequestParam Map&lt;String, String&gt; params) {
+        try {
+            String sign       = params.get("sign");
+            String mchNo      = params.get("mchNo");      // 必有
+            String bizOrderNo = params.get("bizOrderNo"); // 必有
+            String orderNo    = params.get("orderNo");    // 必有
+            String status     = params.get("status");     // 必有
+            String amount     = params.get("amount");     // 必有
+            String title      = params.get("title");      // 可能为空
+            String payTime    = params.get("payTime");    // 可能为空
+
+            // 1. 验证签名
+            if (sign == null || !verifySign(params, sign, PLATFORM_PUBLIC_KEY)) {
+                return "FAIL";
+            }
+
+            // 2. 处理业务逻辑
+            // 回调中无 noticeType，可通过本地数据库查询 bizOrderNo 对应的订单类型来区分代收/代付
+            if ("success".equals(status)) {
+                // TODO: 更新本地订单状态为成功，执行后续业务（发货、结算等）
+                System.out.println("订单成功: " + bizOrderNo + "，金额: " + amount);
+            } else if ("fail".equals(status)) {
+                // TODO: 更新本地订单状态为失败
+                System.out.println("订单失败: " + bizOrderNo);
+            } else if ("closed".equals(status)) {
+                // TODO: 更新本地订单状态为已关闭
+                System.out.println("订单已关闭: " + bizOrderNo);
+            }
+
+            // 3. 返回 SUCCESS 告知 DCPAY 通知已处理，停止重试
+            return "SUCCESS";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "FAIL";
+        }
+    }
+
+    /**
+     * RSA2 验签（SHA256WithRSA）
+     * 与服务端 PaySignUtil.createLinkString 保持一致：去掉 " 和 \ 字符
+     */
+    private boolean verifySign(Map&lt;String, String&gt; params, String sign, String publicKeyStr) throws Exception {
+        List&lt;String&gt; keys = new ArrayList&lt;&gt;(params.keySet());
+        Collections.sort(keys);
+        StringBuilder sb = new StringBuilder();
+        for (String key : keys) {
+            String value = params.get(key);
+            if (!"sign".equals(key) &amp;&amp; value != null &amp;&amp; !value.isEmpty()) {
+                if (sb.length() &gt; 0) sb.append("&amp;");
+                sb.append(key).append("=").append(value);
+            }
+        }
+        // 去掉 " 和 \ 字符，与服务端签名逻辑保持一致
+        String signStr = sb.toString().replace("\\", "").replace("\"", "");
+
+        String pubKeyPEM = publicKeyStr
+            .replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace("-----END PUBLIC KEY-----", "")
+            .replaceAll("\\s+", "");
+        byte[] keyBytes = Base64.getDecoder().decode(pubKeyPEM);
+        PublicKey publicKey = KeyFactory.getInstance("RSA")
+            .generatePublic(new X509EncodedKeySpec(keyBytes));
+
+        Signature signature = Signature.getInstance("SHA256WithRSA");
+        signature.initVerify(publicKey);
+        signature.update(signStr.getBytes(StandardCharsets.UTF_8));
+        return signature.verify(Base64.getDecoder().decode(sign));
+    }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>回调示例（PHP）</h3>
+            <div class="code-block">
+              <pre><code>&lt;?php
+// 平台公钥（从商户端设置页面获取）
+$platformPublicKey = "-----BEGIN PUBLIC KEY-----
+您的平台公钥内容...
+-----END PUBLIC KEY-----";
+
+// 1. 获取所有回调参数
+$params = $_GET;
+$sign = $params['sign'] ?? '';
+
+// 2. 验证签名
+if (empty($sign) || !verifySign($params, $sign, $platformPublicKey)) {
+    echo 'FAIL';
+    exit;
+}
+
+// 3. 处理业务逻辑
+// 回调中无 noticeType，可通过本地数据库查询 bizOrderNo 对应的订单类型来区分代收/代付
+$bizOrderNo = $params['bizOrderNo'] ?? ''; // 必有
+$orderNo    = $params['orderNo'] ?? '';    // 必有
+$status     = $params['status'] ?? '';     // 必有
+$amount     = $params['amount'] ?? '';     // 必有
+$title      = $params['title'] ?? '';      // 可能为空
+$payTime    = $params['payTime'] ?? '';    // 可能为空
+
+if ($status === 'success') {
+    // TODO: 更新本地订单状态为成功，执行后续业务（发货、结算等）
+    error_log("订单成功: " . $bizOrderNo . "，金额: " . $amount);
+} elseif ($status === 'fail') {
+    // TODO: 更新本地订单状态为失败
+    error_log("订单失败: " . $bizOrderNo);
+} elseif ($status === 'closed') {
+    // TODO: 更新本地订单状态为已关闭
+    error_log("订单已关闭: " . $bizOrderNo);
+}
+
+// 4. 返回 SUCCESS
+echo 'SUCCESS';
+
+/**
+ * RSA2 验签（SHA256WithRSA）
+ * 与服务端 PaySignUtil.createLinkString 保持一致：去掉 " 和 \ 字符
+ */
+function verifySign($params, $sign, $publicKeyPem) {
+    unset($params['sign']);
+    // 过滤空值
+    $params = array_filter($params, function($v) { return $v !== null &amp;&amp; $v !== ''; });
+    // 按参数名 ASCII 升序排列
+    ksort($params);
+    $pairs = [];
+    foreach ($params as $k =&gt; $v) {
+        $pairs[] = $k . '=' . $v;
+    }
+    // 去掉 " 和 \ 字符，与服务端签名逻辑保持一致
+    $signStr = str_replace(['\\', '"'], '', implode('&amp;', $pairs));
+
+    $publicKey = openssl_pkey_get_public($publicKeyPem);
+    $result = openssl_verify($signStr, base64_decode($sign), $publicKey, OPENSSL_ALGO_SHA256);
+    return $result === 1;
+}
+?&gt;</code></pre>
+            </div>
           </div>
         </div>
 
@@ -1465,8 +1783,8 @@ $jsonData = json_encode($params);
           </div>
 
           <div class="card">
-            <h3>Java SDK 示例</h3>
-            <p>包含代收下单、代付下单、订单查询、余额查询等完整示例代码，支持 RSA2 签名验证。</p>
+            <h3>Java 示例</h3>
+            <p>包含代收下单、代付下单、订单查询、余额查询、回调通知接收完整示例，纯 Java 标准库实现，无需第三方依赖。</p>
             <div style="margin-top: 20px;">
               <button class="download-btn" @click="downloadDemo">
                 <span style="margin-right: 8px;">📥</span> 下载示例代码 (dcpayDemo.zip)
@@ -1475,18 +1793,67 @@ $jsonData = json_encode($params);
           </div>
 
           <div class="card">
+            <h3>目录结构</h3>
+            <div class="code-block">
+              <pre><code>dcpayDemo/
+└── src/
+    ├── pay/                         # 代收下单
+    │   ├── DcPayClient.java         # 客户端（签名、请求、解析）
+    │   ├── PayRequest.java          # 请求参数封装
+    │   ├── PayResponse.java         # 响应结果封装
+    │   └── PayExample.java          # 调用示例
+    ├── transfer/                    # 代付下单
+    │   ├── TransferClient.java
+    │   ├── TransferRequest.java
+    │   ├── TransferResponse.java
+    │   └── TransferExample.java
+    ├── queryOrder/                  # 订单查询
+    │   ├── QueryOrderClient.java
+    │   ├── QueryOrderRequest.java
+    │   ├── QueryOrderResponse.java
+    │   └── QueryOrderExample.java
+    ├── queryBalance/                # 商户余额查询
+    │   ├── QueryBalanceClient.java
+    │   ├── QueryBalanceRequest.java
+    │   ├── QueryBalanceResponse.java
+    │   └── QueryBalanceExample.java
+    └── notifyUrlController/         # 回调通知接收（Spring Boot）
+        └── NotifyController.java    # 接收 DCPAY 回调的 Controller 示例</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
             <h3>示例代码说明</h3>
             <table class="api-table">
               <thead>
                 <tr>
+                  <th>目录</th>
                   <th>文件</th>
                   <th>说明</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
+                  <td rowspan="4"><code>pay/</code></td>
+                  <td><code>DcPayClient.java</code></td>
+                  <td>代收下单客户端（签名、请求、解析）</td>
+                </tr>
+                <tr>
+                  <td><code>PayRequest.java</code></td>
+                  <td>代收请求参数封装</td>
+                </tr>
+                <tr>
+                  <td><code>PayResponse.java</code></td>
+                  <td>代收响应结果封装</td>
+                </tr>
+                <tr>
+                  <td><code>PayExample.java</code></td>
+                  <td>代收调用示例</td>
+                </tr>
+                <tr>
+                  <td rowspan="4"><code>transfer/</code></td>
                   <td><code>TransferClient.java</code></td>
-                  <td>代付下单客户端示例</td>
+                  <td>代付下单客户端（签名、请求、解析）</td>
                 </tr>
                 <tr>
                   <td><code>TransferRequest.java</code></td>
@@ -1500,19 +1867,94 @@ $jsonData = json_encode($params);
                   <td><code>TransferExample.java</code></td>
                   <td>代付调用示例</td>
                 </tr>
+                <tr>
+                  <td rowspan="4"><code>queryOrder/</code></td>
+                  <td><code>QueryOrderClient.java</code></td>
+                  <td>订单查询客户端（签名、请求、解析）</td>
+                </tr>
+                <tr>
+                  <td><code>QueryOrderRequest.java</code></td>
+                  <td>订单查询请求参数封装</td>
+                </tr>
+                <tr>
+                  <td><code>QueryOrderResponse.java</code></td>
+                  <td>订单查询响应结果封装</td>
+                </tr>
+                <tr>
+                  <td><code>QueryOrderExample.java</code></td>
+                  <td>订单查询调用示例</td>
+                </tr>
+                <tr>
+                  <td rowspan="4"><code>queryBalance/</code></td>
+                  <td><code>QueryBalanceClient.java</code></td>
+                  <td>余额查询客户端（签名、请求、解析）</td>
+                </tr>
+                <tr>
+                  <td><code>QueryBalanceRequest.java</code></td>
+                  <td>余额查询请求参数封装</td>
+                </tr>
+                <tr>
+                  <td><code>QueryBalanceResponse.java</code></td>
+                  <td>余额查询响应结果封装</td>
+                </tr>
+                <tr>
+                  <td><code>QueryBalanceExample.java</code></td>
+                  <td>余额查询调用示例</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrlController/</code></td>
+                  <td><code>NotifyController.java</code></td>
+                  <td>回调通知接收 Controller（Spring Boot），用于接收 DCPAY 订单状态变更通知</td>
+                </tr>
               </tbody>
             </table>
           </div>
 
           <div class="card">
             <h3>使用说明</h3>
-            <ol>
-              <li>下载示例代码压缩包</li>
-              <li>解压后将代码导入您的项目中</li>
-              <li>修改商户号、私钥等配置信息</li>
-              <li>根据业务需求调整参数</li>
-              <li>运行测试验证接口调用</li>
-            </ol>
+            <h4>环境要求</h4>
+            <ul>
+              <li>Java 11+（使用了 <code>java.net.http.HttpClient</code>）</li>
+              <li>无需第三方依赖，开箱即用</li>
+              <li><code>NotifyController.java</code> 需集成到 Spring Boot 项目中使用</li>
+            </ul>
+
+            <h4>配置参数</h4>
+            <p>打开对应的 <code>*Example.java</code> 文件，修改以下参数：</p>
+            <div class="code-block">
+              <pre><code>String baseUrl = "https://api.dcpay.me";  // API 地址，固定不变
+String mchNo = "DC1010";                  // 替换为您的商户号
+String privateKey = "-----BEGIN PRIVATE KEY-----\n" +
+    "您的商户私钥内容...\n" +
+    "-----END PRIVATE KEY-----";</code></pre>
+            </div>
+            <p><code>NotifyController.java</code> 中需配置平台公钥（用于验证回调签名）：</p>
+            <div class="code-block">
+              <pre><code>private static final String PLATFORM_PUBLIC_KEY =
+    "-----BEGIN PUBLIC KEY-----\n" +
+    "您的平台公钥内容...\n" +
+    "-----END PUBLIC KEY-----";</code></pre>
+            </div>
+            <p>商户号、私钥、平台公钥请登录 <a href="https://admin.dcpay.me/" target="_blank">商户端</a> → 设置 页面获取。</p>
+
+            <h4>编译与运行</h4>
+            <p>在 <code>dcpayDemo/</code> 根目录下执行：</p>
+            <div class="code-block">
+              <pre><code># 编译所有文件
+javac -d out $(find src -name "*.java")
+
+# 运行代收下单示例
+java -cp out src.pay.PayExample
+
+# 运行代付下单示例
+java -cp out src.transfer.TransferExample
+
+# 运行订单查询示例
+java -cp out src.queryOrder.QueryOrderExample
+
+# 运行余额查询示例
+java -cp out src.queryBalance.QueryBalanceExample</code></pre>
+            </div>
           </div>
         </div>
 
