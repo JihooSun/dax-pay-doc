@@ -777,7 +777,7 @@ $jsonData = json_encode($params);
                   <td><code>transferMode</code></td>
                   <td>String</td>
                   <td>否</td>
-                  <td>传输模式：IMPS、NEFT、RTGS、UPI</td>
+                  <td>传输模式：IMPS、UPI（默认IMPS， UPI需要添加VPA）</td>
                 </tr>
                 <tr>
                   <td><code>vpa</code></td>
