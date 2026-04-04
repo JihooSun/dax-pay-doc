@@ -583,7 +583,12 @@ $jsonData = json_encode($params);
                 <tr>
                   <td><code>payData</code></td>
                   <td>String</td>
-                  <td>支付参数体，用于发起支付的参数</td>
+                  <td>收银台支付 URL，未开启 deeplink 时返回</td>
+                </tr>
+                <tr>
+                  <td><code>deeplinks</code></td>
+                  <td>String</td>
+                  <td>JSON 格式的 UPI deeplink 链接，包含 upi / gpay / phonepe / paytm 四个字段，可能为空</td>
                 </tr>
                 <tr>
                   <td><code>extraParam</code></td>
@@ -600,7 +605,7 @@ $jsonData = json_encode($params);
           </div>
 
           <div class="card">
-            <h3>返回示例</h3>
+            <h3>返回示例（收银台模式）</h3>
             <div class="code-block">
               <pre><code>{
   "code": 0,
@@ -608,8 +613,28 @@ $jsonData = json_encode($params);
   "data": {
     "bizOrderNo": "ORDER_20260301001",
     "orderNo": "DCP202603010001",
-    "status": "pending",
+    "status": "progress",
     "payData": "https://pay.dcpay.com/...",
+    "deeplinks": null,
+    "extraParam": null,
+    "amount": "100"
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>返回示例（Deeplink 模式）</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bizOrderNo": "ORDER_20260301001",
+    "orderNo": "DCP202603010001",
+    "status": "progress",
+    "payData": null,
+    "deeplinks": "{\"upi\":\"upi://pay?pa=xxx@indus&...\",\"gpay\":\"tez://upi/pay?...\",\"phonepe\":\"phonepe://pay?...\",\"paytm\":\"paytmmp://pay?...\"}",
     "extraParam": null,
     "amount": "100"
   }
