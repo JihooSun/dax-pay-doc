@@ -1281,6 +1281,12 @@ $jsonData = json_encode($params);
                   <td>否</td>
                   <td>支付/完成时间，13位时间戳（毫秒），订单未完成时不返回</td>
                 </tr>
+                <tr>
+                  <td><code>utr</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>UTR 流水号，代付订单成功时返回</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1296,6 +1302,14 @@ $jsonData = json_encode($params);
               </thead>
               <tbody>
                 <tr>
+                  <td><code>wait</code></td>
+                  <td>待支付（代收）/ 待处理（代付）</td>
+                </tr>
+                <tr>
+                  <td><code>progress</code></td>
+                  <td>支付中（代收）/ 处理中（代付）</td>
+                </tr>
+                <tr>
                   <td><code>success</code></td>
                   <td>成功</td>
                 </tr>
@@ -1304,8 +1318,28 @@ $jsonData = json_encode($params);
                   <td>失败</td>
                 </tr>
                 <tr>
-                  <td><code>closed</code></td>
+                  <td><code>close</code></td>
                   <td>已关闭</td>
+                </tr>
+                <tr>
+                  <td><code>cancel</code></td>
+                  <td>已撤销（仅代收）</td>
+                </tr>
+                <tr>
+                  <td><code>timeout</code></td>
+                  <td>已超时（仅代收）</td>
+                </tr>
+                <tr>
+                  <td><code>review_success</code></td>
+                  <td>人工审核成功，等同于成功，建议与 success 一同处理</td>
+                </tr>
+                <tr>
+                  <td><code>review_fail</code></td>
+                  <td>人工审核失败，等同于失败</td>
+                </tr>
+                <tr>
+                  <td><code>reversal_fail</code></td>
+                  <td>冲正（订单被撤回），等同于失败</td>
                 </tr>
               </tbody>
             </table>
