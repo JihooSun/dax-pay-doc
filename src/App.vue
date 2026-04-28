@@ -476,7 +476,7 @@ $jsonData = json_encode($params);
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
                   <td>是</td>
-                  <td>支付金额，精度到分，最小0.01</td>
+                  <td>支付金额，精度到分，最小0.01<br/>注意：签名时金额需去掉末尾多余的零，例如 100.00 应写成 100，100.10 应写成 100.1</td>
                 </tr>
                 <tr>
                   <td><code>currency</code></td>
@@ -700,7 +700,7 @@ $jsonData = json_encode($params);
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
                   <td>是</td>
-                  <td>支付金额，精度到分，最小0.01</td>
+                  <td>支付金额，精度到分，最小0.01<br/>注意：签名时金额需去掉末尾多余的零，例如 100.00 应写成 100，100.10 应写成 100.1</td>
                 </tr>
                 <tr>
                   <td><code>currency</code></td>
