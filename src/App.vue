@@ -1,41 +1,27 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 
 const activeMenu = ref('welcome')
-
-let ticking = false
-
-function onScroll() {
-  if (ticking) return
-  ticking = true
-  requestAnimationFrame(() => {
-    const headerHeight = 64
-    const sections = document.querySelectorAll('.section')
-    let current = sections[0]?.id || 'welcome'
-    sections.forEach((section) => {
-      const top = section.getBoundingClientRect().top
-      if (top <= headerHeight + 10) {
-        current = section.id
-      }
-    })
-    activeMenu.value = current
-    ticking = false
-  })
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', onScroll, { passive: true })
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
-})
 
 const menuItems = [
   { key: 'welcome', title: '欢迎' },
   { key: 'sign', title: '签名规则' },
-  { key: 'pay', title: '代收下单' },
-  { key: 'transfer', title: '代付下单' },
+  {
+    key: 'pay',
+    title: '代收下单',
+    children: [
+      { key: 'pay-india', title: '印度通道' },
+      { key: 'pay-usa', title: '美国通道' },
+    ],
+  },
+  {
+    key: 'transfer',
+    title: '代付下单',
+    children: [
+      { key: 'transfer-india', title: '印度通道' },
+      { key: 'transfer-usa', title: '美国通道' },
+    ],
+  },
   { key: 'query', title: '订单查询' },
   { key: 'balance', title: '商户余额查询' },
   { key: 'notify', title: '回调通知' },
@@ -44,18 +30,23 @@ const menuItems = [
   { key: 'telegram', title: 'Telegram机器人' },
 ]
 
-function scrollToSection(key) {
-  activeMenu.value = key
-  const element = document.getElementById(key)
-  if (element) {
-    const headerHeight = 64
-    const elementPosition = element.getBoundingClientRect().top
-    const offsetPosition = elementPosition + window.pageYOffset - headerHeight
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    })
+// 默认展开代收/代付两个父级菜单
+const expandedKeys = ref(['pay', 'transfer'])
+
+function toggleExpand(key) {
+  const idx = expandedKeys.value.indexOf(key)
+  if (idx >= 0) {
+    expandedKeys.value.splice(idx, 1)
+  } else {
+    expandedKeys.value.push(key)
   }
+}
+
+// 点击左侧菜单切换右侧章节, 右侧仅显示当前选中章节
+function selectSection(key) {
+  activeMenu.value = key
+  // 切换后回到内容区顶部
+  window.scrollTo({ top: 0, behavior: 'auto' })
 }
 
 function downloadDemo() {
@@ -90,13 +81,38 @@ function downloadDemo() {
           <h3>API 文档</h3>
           <ul>
             <li v-for="item in menuItems" :key="item.key">
-              <a 
-                href="javascript:;" 
+              <!-- 无子菜单: 直接切换章节 -->
+              <a
+                v-if="!item.children"
+                href="javascript:;"
                 :class="{ active: activeMenu === item.key }"
-                @click="scrollToSection(item.key)"
+                @click="selectSection(item.key)"
               >
                 {{ item.title }}
               </a>
+              <!-- 有子菜单: 点击展开/收起 -->
+              <template v-else>
+                <a
+                  href="javascript:;"
+                  class="parent-menu"
+                  :class="{ expanded: expandedKeys.includes(item.key) }"
+                  @click="toggleExpand(item.key)"
+                >
+                  {{ item.title }}
+                  <span class="arrow">{{ expandedKeys.includes(item.key) ? '▾' : '▸' }}</span>
+                </a>
+                <ul v-show="expandedKeys.includes(item.key)" class="submenu">
+                  <li v-for="child in item.children" :key="child.key">
+                    <a
+                      href="javascript:;"
+                      :class="{ active: activeMenu === child.key }"
+                      @click="selectSection(child.key)"
+                    >
+                      {{ child.title }}
+                    </a>
+                  </li>
+                </ul>
+              </template>
             </li>
           </ul>
         </div>
@@ -104,7 +120,7 @@ function downloadDemo() {
 
       <section class="content">
         <!-- 欢迎 -->
-        <div id="welcome" class="section">
+        <div id="welcome" class="section" v-show="activeMenu === 'welcome'">
           <div class="content-header">
             <h2>欢迎使用 DCPAY API</h2>
             <p>DCPAY 是一个安全、稳定、高效的支付服务平台，为您的业务提供全方位的支付解决方案。</p>
@@ -165,7 +181,7 @@ function downloadDemo() {
         </div>
 
         <!-- 签名规则 -->
-        <div id="sign" class="section">
+        <div id="sign" class="section" v-show="activeMenu === 'sign'">
           <div class="content-header">
             <h2>签名规则</h2>
             <p>为保证接口调用的安全性，所有 API 请求都需要进行签名验证。DCPAY 采用 RSA2（SHA256WithRSA）签名算法。</p>
@@ -420,7 +436,7 @@ $jsonData = json_encode($params);
         </div>
 
         <!-- 代收下单 -->
-        <div id="pay" class="section">
+        <div id="pay" class="section" v-show="activeMenu === 'pay-india'">
           <div class="content-header">
             <h2>代收下单</h2>
             <p>代收（收款）接口，用于发起一笔收款订单。</p>
@@ -644,7 +660,7 @@ $jsonData = json_encode($params);
         </div>
 
         <!-- 代付下单 -->
-        <div id="transfer" class="section">
+        <div id="transfer" class="section" v-show="activeMenu === 'transfer-india'">
           <div class="content-header">
             <h2>代付下单</h2>
             <p>代付（转账）接口，用于向银行账户转账。</p>
@@ -861,8 +877,539 @@ $jsonData = json_encode($params);
           </div>
         </div>
 
+        <!-- 美国代收下单 -->
+        <div id="pay-usa" class="section" v-show="activeMenu === 'pay-usa'">
+          <div class="content-header">
+            <h2>代收下单 · 美国通道</h2>
+            <p>代收（收款）接口，用于发起一笔美元收款订单。货币为 USD，金额精确到「分」。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/pay</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+                <tr>
+                  <td>签名算法</td>
+                  <td>RSA2（SHA256WithRSA），见「签名规则」章节</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>下单说明</h3>
+            <ul>
+              <li><code>currency</code> 取 <code>USD</code>，<code>amount</code> 单位为「分」（如 <code>1000</code> 表示 10.00 USD）。</li>
+              <li>采用<strong>收银台模式</strong>：下单成功后返回收银台 URL（<code>payData</code>），商户需将付款人重定向到该 URL，由付款人在收银台内选择具体支付方式并完成付款。</li>
+            </ul>
+            <p><strong>关于支付方式：</strong>代收下单<strong>无需</strong>传 <code>wayCode</code>。付款人实际使用的支付方式由通道在回调中上报（回调参数 <code>wayCode</code>）。收银台当前支持的支付方式包括 CashApp、Apple Pay、Google Pay、PayPal 等；具体为某商户开通哪些、对应费率多少，以对接群 / 管理员确认为准。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>支付金额，单位为「分」，最小0.01。单笔限额以对接群 / 后台为准</td>
+                </tr>
+                <tr>
+                  <td><code>currency</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>货币代码，固定为 <code>USD</code></td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，支付结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>returnUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>同步跳转地址，支付完成后跳转的页面</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，回调时原样返回，最大2048位</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC2001",
+  "bizOrderNo": "ORDER_US_20260601001",
+  "amount": 1000,
+  "currency": "USD",
+  "reqTime": 1704067200000,
+  "sign": "K2Jx8vM3nQ...",
+  "title": "Top-up",
+  "clientIp": "1.1.1.1",
+  "notifyUrl": "https://example.com/notify",
+  "returnUrl": "https://example.com/return"
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 1000</code> 表示 10.00 USD（单位为分）。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回示例（收银台）</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bizOrderNo": "ORDER_US_20260601001",
+    "orderNo": "DCP202606010001",
+    "status": "progress",
+    "payData": "https://pay.dcpay.me/cashier/3780d6099eb5480baf6aea38d5c90188",
+    "extraParam": null,
+    "amount": "1000"
+  }
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;"><code>payData</code> 为收银台地址，商户将付款人重定向到该地址完成付款。</p>
+          </div>
+
+          <div class="card">
+            <h3>回调与查询</h3>
+            <p>支付结果通过「回调通知」推送，商户也可调用「订单查询」「商户余额查询」接口主动查询。回调与查询返回的金额货币为 USD、单位为「分」。</p>
+          </div>
+        </div>
+
+        <!-- 美国代付下单 -->
+        <div id="transfer-usa" class="section" v-show="activeMenu === 'transfer-usa'">
+          <div class="content-header">
+            <h2>代付下单 · 美国通道</h2>
+            <p>代付（转账）接口，用于发起一笔美元代付。货币为 USD，通过 <code>wayCode</code> + <code>wayParam</code> 指定收款方式。</p>
+          </div>
+
+          <div class="card">
+            <h3>下单说明</h3>
+            <p>请求接口 <code>POST /unipay/transfer</code>，Content-Type 为 <code>application/json</code>，签名算法 RSA2（见「签名规则」章节）。代付收款方式通过以下两个字段指定：</p>
+            <ul>
+              <li><code>currency</code> 取 <code>USD</code>，<code>amount</code> 单位为「分」。</li>
+              <li><code>wayCode</code>（支付方式）为<strong>必传</strong>，<code>wayParam</code>（支付方式参数，JSON 对象）随 <code>wayCode</code> 不同而不同，也为<strong>必传</strong>。</li>
+            </ul>
+            <p style="margin-top: 8px; color: #d46b08;"><strong>注意：</strong><code>wayParam</code> 须为合法 JSON 对象，其 key 必须为合法 ASCII 标识符（字母 / 数字 / 下划线，字母或下划线开头）；非法 key 会被网关过滤，可能导致代付失败。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>代付金额，精确到分。单笔限额随支付方式不同，以对接群 / 后台为准</td>
+                </tr>
+                <tr>
+                  <td><code>currency</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>货币代码，固定为 <code>USD</code></td>
+                </tr>
+                <tr>
+                  <td><code>wayCode</code></td>
+                  <td>String</td>
+                  <td><strong>是</strong></td>
+                  <td>支付方式编码，见下方「代付支付方式」表（如 <code>ecashapp</code> / <code>paypal</code> / <code>zelle</code> 等）</td>
+                </tr>
+                <tr>
+                  <td><code>wayParam</code></td>
+                  <td>JSONObject</td>
+                  <td><strong>是</strong></td>
+                  <td>支付方式参数，字段随 <code>wayCode</code> 不同，见下方各支付方式参数表</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，代付结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，回调时原样返回，最大2048位</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>代付支付方式（wayCode）</h3>
+            <p>下表列出支持的全部代付方式及其 <code>wayParam</code> 必填字段。<strong>具体为某商户开通哪些支付方式，以对接群 / 管理员确认为准</strong>；使用未开通的 <code>wayCode</code> 下单会被拒绝。</p>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>wayCode</th>
+                  <th>支付方式</th>
+                  <th>wayParam 必填字段</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>ecashapp</code></td>
+                  <td>CashApp（个码）</td>
+                  <td><code>cashtag</code>：收款标签（$ 开头）</td>
+                </tr>
+                <tr>
+                  <td><code>paypal</code></td>
+                  <td>PayPal</td>
+                  <td><code>email</code>：收款邮箱</td>
+                </tr>
+                <tr>
+                  <td><code>venmo</code></td>
+                  <td>Venmo</td>
+                  <td><code>email</code>：收款邮箱</td>
+                </tr>
+                <tr>
+                  <td><code>emt</code></td>
+                  <td>Interac e-Transfer</td>
+                  <td><code>email</code>：收款邮箱</td>
+                </tr>
+                <tr>
+                  <td><code>card</code></td>
+                  <td>储蓄卡</td>
+                  <td><code>cardNumber</code>：卡号；<code>cardValid</code>：卡过期时间（MM/YYYY）</td>
+                </tr>
+                <tr>
+                  <td><code>ach</code></td>
+                  <td>ACH</td>
+                  <td><code>accountNumber</code>：账号；<code>routingNumber</code>：路由号（9位）</td>
+                </tr>
+                <tr>
+                  <td><code>chime</code></td>
+                  <td>Chime</td>
+                  <td><code>chimeSign</code>：Chime 账号（$ 开头）</td>
+                </tr>
+                <tr>
+                  <td><code>zelle</code></td>
+                  <td>Zelle</td>
+                  <td><code>zelleSign</code>：Zelle 邮箱或电话号码</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top: 8px;">ACH 周末亦可到账，到账时间相对较长，具体以实际为准。</p>
+          </div>
+
+          <div class="card">
+            <h3>wayParam 字段明细（按支付方式分组）</h3>
+
+            <h4>CashApp（wayCode = ecashapp）</h4>
+            <table class="api-table">
+              <thead>
+                <tr><th>变量名</th><th>必填</th><th>类型</th><th>示例值</th><th>说明</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>cashtag</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>$YourTag</td>
+                  <td>$ 开头的收款标签，需带上 '$'，区分大小写，须填写正确才能正常收款</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4>PayPal / Venmo / Interac e-Transfer（wayCode = paypal / venmo / emt）</h4>
+            <table class="api-table">
+              <thead>
+                <tr><th>变量名</th><th>必填</th><th>类型</th><th>示例值</th><th>说明</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>email</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>payee@example.com</td>
+                  <td>收款邮箱，须填写正确才能正常收款</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4>储蓄卡（wayCode = card）</h4>
+            <table class="api-table">
+              <thead>
+                <tr><th>变量名</th><th>必填</th><th>类型</th><th>示例值</th><th>说明</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>cardNumber</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>4111111111111111</td>
+                  <td>收款卡号</td>
+                </tr>
+                <tr>
+                  <td><code>cardValid</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>01/2028</td>
+                  <td>卡过期时间，格式 MM/YYYY</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4>ACH（wayCode = ach）</h4>
+            <table class="api-table">
+              <thead>
+                <tr><th>变量名</th><th>必填</th><th>类型</th><th>示例值</th><th>说明</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>accountNumber</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>123456789012</td>
+                  <td>银行账户号码</td>
+                </tr>
+                <tr>
+                  <td><code>routingNumber</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>026009593</td>
+                  <td>美国 ACH 路由号码（9位）</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4>Chime（wayCode = chime）</h4>
+            <table class="api-table">
+              <thead>
+                <tr><th>变量名</th><th>必填</th><th>类型</th><th>示例值</th><th>说明</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>chimeSign</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>$test888</td>
+                  <td>$ 开头的 Chime 账号</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4>Zelle（wayCode = zelle）</h4>
+            <table class="api-table">
+              <thead>
+                <tr><th>变量名</th><th>必填</th><th>类型</th><th>示例值</th><th>说明</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>zelleSign</code></td>
+                  <td>是</td>
+                  <td>String</td>
+                  <td>payee@example.com 或 +12125550000</td>
+                  <td>Zelle 邮箱或电话号码</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>代付请求示例（美国）</h3>
+            <p>以 CashApp 个码为例：</p>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC2001",
+  "bizOrderNo": "TRANSFER_US_20260601001",
+  "amount": 10000,
+  "currency": "USD",
+  "reqTime": 1704067200000,
+  "sign": "K2Jx8vM3nQ...",
+  "clientIp": "1.1.1.1",
+  "notifyUrl": "https://example.com/transfer/notify",
+  "wayCode": "ecashapp",
+  "wayParam": {
+    "cashtag": "$YourTag"
+  }
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">其他支付方式只需替换 <code>wayCode</code> 与对应的 <code>wayParam</code>，例如 PayPal：<code>"wayCode": "paypal", "wayParam": {"email": "payee@example.com"}</code>；银行卡：<code>"wayCode": "card", "wayParam": {"cardNumber": "4111111111111111", "cardValid": "01/2028"}</code>。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bizOrderNo": "TRANSFER_US_20260601001",
+    "orderNo": "DCT202606010001",
+    "status": "progress",
+    "extraParam": null,
+    "amount": "10000"
+  }
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">下单成功后通道异步处理，最终结果以「回调通知」为准。返回中的金额货币为 USD、单位为「分」。</p>
+          </div>
+
+          <div class="card">
+            <h3>代付常见错误（美国 wayCode 相关）</h3>
+            <p>下列错误沿用统一错误码体系，详见「错误码」章节，此处补充美国 wayCode 语境：</p>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">错误码</th>
+                  <th>情形</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>20011</code></td>
+                  <td>wayCode 未启用</td>
+                  <td>该支付方式未在通道 / 商户开通，请联系对接群 / 管理员确认已开通的支付方式</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>金额低于该 wayCode 最低限额</td>
+                  <td>代付金额低于该支付方式单笔最低限额</td>
+                </tr>
+                <tr>
+                  <td><code>20060</code></td>
+                  <td>金额超过该 wayCode 最高限额</td>
+                  <td>代付金额超过该支付方式单笔最高限额</td>
+                </tr>
+                <tr>
+                  <td><code>20045</code></td>
+                  <td>Insufficient balance</td>
+                  <td>商户余额不足，请充值后重试</td>
+                </tr>
+                <tr>
+                  <td><code>20091</code></td>
+                  <td>wayCode / wayParam 缺失或格式错误</td>
+                  <td><code>wayCode</code> 为空或 <code>wayParam</code> 缺少必填字段 / 非合法 JSON</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>回调与查询</h3>
+            <p>代付结果通过「回调通知」推送，商户也可调用「订单查询」「商户余额查询」接口主动查询。回调与查询返回的金额货币为 USD、单位为「分」。</p>
+          </div>
+        </div>
+
         <!-- 订单查询 -->
-        <div id="query" class="section">
+        <div id="query" class="section" v-show="activeMenu === 'query'">
           <div class="content-header">
             <h2>订单查询</h2>
             <p>查询订单状态接口，可以查询代收订单或代付订单。</p>
@@ -1042,7 +1589,7 @@ $jsonData = json_encode($params);
         </div>
 
         <!-- 商户余额查询 -->
-        <div id="balance" class="section">
+        <div id="balance" class="section" v-show="activeMenu === 'balance'">
           <div class="content-header">
             <h2>商户余额查询</h2>
             <p>查询商户账户余额信息接口，可查询可用余额、待结算余额、冻结余额等。</p>
@@ -1205,7 +1752,7 @@ $jsonData = json_encode($params);
           </div>
         </div>
         <!-- 回调通知 -->
-        <div id="notify" class="section">
+        <div id="notify" class="section" v-show="activeMenu === 'notify'">
           <div class="content-header">
             <h2>回调通知</h2>
             <p>当订单状态发生变化（支付成功、代付完成等）时，DCPAY 会向下单时填写的 <code>notifyUrl</code> 发送 GET 请求，通知商户处理业务逻辑。</p>
@@ -1529,7 +2076,7 @@ function verifySign($params, $sign, $publicKeyPem) {
         </div>
 
         <!-- 错误码 -->
-        <div id="errorcode" class="section">
+        <div id="errorcode" class="section" v-show="activeMenu === 'errorcode'">
           <div class="content-header">
             <h2>错误码</h2>
             <p>API 接口返回的错误码及错误信息说明，方便商户进行错误处理。</p>
@@ -1835,7 +2382,7 @@ function verifySign($params, $sign, $publicKeyPem) {
         </div>
 
         <!-- 示例代码 -->
-        <div id="download" class="section">
+        <div id="download" class="section" v-show="activeMenu === 'download'">
           <div class="content-header">
             <h2>示例代码</h2>
             <p>DCPAY 提供完整的示例代码，帮助您快速集成 API 接口。</p>
@@ -1860,12 +2407,14 @@ function verifySign($params, $sign, $publicKeyPem) {
     │   ├── DcPayClient.java         # 客户端（签名、请求、解析）
     │   ├── PayRequest.java          # 请求参数封装
     │   ├── PayResponse.java         # 响应结果封装
-    │   └── PayExample.java          # 调用示例
+    │   ├── PayIndiaExample.java     # 代收调用示例（印度 INR）
+    │   └── PayUsaExample.java       # 代收调用示例（美国 USD，收银台）
     ├── transfer/                    # 代付下单
     │   ├── TransferClient.java
     │   ├── TransferRequest.java
     │   ├── TransferResponse.java
-    │   └── TransferExample.java
+    │   ├── TransferIndiaExample.java # 代付调用示例（印度，银行账户/IFSC）
+    │   └── TransferUsaExample.java   # 代付调用示例（美国，wayCode/wayParam）
     ├── queryOrder/                  # 订单查询
     │   ├── QueryOrderClient.java
     │   ├── QueryOrderRequest.java
@@ -1893,7 +2442,7 @@ function verifySign($params, $sign, $publicKeyPem) {
               </thead>
               <tbody>
                 <tr>
-                  <td rowspan="4"><code>pay/</code></td>
+                  <td rowspan="5"><code>pay/</code></td>
                   <td><code>DcPayClient.java</code></td>
                   <td>代收下单客户端（签名、请求、解析）</td>
                 </tr>
@@ -1906,11 +2455,15 @@ function verifySign($params, $sign, $publicKeyPem) {
                   <td>代收响应结果封装</td>
                 </tr>
                 <tr>
-                  <td><code>PayExample.java</code></td>
-                  <td>代收调用示例</td>
+                  <td><code>PayIndiaExample.java</code></td>
+                  <td>代收调用示例（印度 INR）</td>
                 </tr>
                 <tr>
-                  <td rowspan="4"><code>transfer/</code></td>
+                  <td><code>PayUsaExample.java</code></td>
+                  <td>代收调用示例（美国 USD，收银台）</td>
+                </tr>
+                <tr>
+                  <td rowspan="5"><code>transfer/</code></td>
                   <td><code>TransferClient.java</code></td>
                   <td>代付下单客户端（签名、请求、解析）</td>
                 </tr>
@@ -1923,8 +2476,12 @@ function verifySign($params, $sign, $publicKeyPem) {
                   <td>代付响应结果封装</td>
                 </tr>
                 <tr>
-                  <td><code>TransferExample.java</code></td>
-                  <td>代付调用示例</td>
+                  <td><code>TransferIndiaExample.java</code></td>
+                  <td>代付调用示例（印度，银行账户/IFSC）</td>
+                </tr>
+                <tr>
+                  <td><code>TransferUsaExample.java</code></td>
+                  <td>代付调用示例（美国，wayCode/wayParam）</td>
                 </tr>
                 <tr>
                   <td rowspan="4"><code>queryOrder/</code></td>
@@ -2002,11 +2559,13 @@ String privateKey = "-----BEGIN PRIVATE KEY-----\n" +
               <pre><code># 编译所有文件
 javac -d out $(find src -name "*.java")
 
-# 运行代收下单示例
-java -cp out src.pay.PayExample
+# 运行代收下单示例（印度 / 美国）
+java -cp out src.pay.PayIndiaExample
+java -cp out src.pay.PayUsaExample
 
-# 运行代付下单示例
-java -cp out src.transfer.TransferExample
+# 运行代付下单示例（印度 / 美国）
+java -cp out src.transfer.TransferIndiaExample
+java -cp out src.transfer.TransferUsaExample
 
 # 运行订单查询示例
 java -cp out src.queryOrder.QueryOrderExample
@@ -2018,7 +2577,7 @@ java -cp out src.queryBalance.QueryBalanceExample</code></pre>
         </div>
 
         <!-- Telegram机器人 -->
-        <div id="telegram" class="section">
+        <div id="telegram" class="section" v-show="activeMenu === 'telegram'">
           <div class="content-header">
             <h2>Telegram 机器人</h2>
             <p>DCPAY 提供 Telegram 机器人服务，方便商户实时查询账户信息和订单状态。</p>

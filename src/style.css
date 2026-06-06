@@ -180,6 +180,18 @@ body {
   color: #666;
 }
 
+.sidebar a.parent-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar a.parent-menu .arrow {
+  font-size: 0.7rem;
+  color: #999;
+  transition: transform 0.2s ease;
+}
+
 .content {
   flex: 1;
   background-color: rgba(255, 255, 255, 0.95);
