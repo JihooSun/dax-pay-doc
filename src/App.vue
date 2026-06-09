@@ -614,7 +614,7 @@ $jsonData = json_encode($params);
                 <tr>
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
-                  <td>支付金额</td>
+                  <td>支付金额，单位为分</td>
                 </tr>
               </tbody>
             </table>
@@ -1090,7 +1090,7 @@ $jsonData = json_encode($params);
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
                   <td>是</td>
-                  <td>代付金额，精确到分。单笔限额随支付方式不同，以对接群 / 后台为准</td>
+                  <td>代付金额，单位为分。单笔限额随支付方式不同，以对接群 / 后台为准</td>
                 </tr>
                 <tr>
                   <td><code>currency</code></td>
@@ -1548,12 +1548,12 @@ $jsonData = json_encode($params);
               </thead>
               <tbody>
                 <tr>
-                  <td><code>pending</code></td>
-                  <td>待处理</td>
+                  <td><code>wait</code></td>
+                  <td>待支付（订单已创建，尚未发起支付/转账）</td>
                 </tr>
                 <tr>
-                  <td><code>processing</code></td>
-                  <td>处理中</td>
+                  <td><code>progress</code></td>
+                  <td>处理中（支付中 / 转账中）</td>
                 </tr>
                 <tr>
                   <td><code>success</code></td>
@@ -1564,8 +1564,28 @@ $jsonData = json_encode($params);
                   <td>失败</td>
                 </tr>
                 <tr>
-                  <td><code>closed</code></td>
+                  <td><code>close</code></td>
                   <td>已关闭</td>
+                </tr>
+                <tr>
+                  <td><code>cancel</code></td>
+                  <td>已撤销</td>
+                </tr>
+                <tr>
+                  <td><code>timeout</code></td>
+                  <td>已超时</td>
+                </tr>
+                <tr>
+                  <td><code>reversal_fail</code></td>
+                  <td>冲正</td>
+                </tr>
+                <tr>
+                  <td><code>review_success</code></td>
+                  <td>人工审核成功（按成功处理）</td>
+                </tr>
+                <tr>
+                  <td><code>review_fail</code></td>
+                  <td>人工审核失败（按失败处理）</td>
                 </tr>
               </tbody>
             </table>
@@ -1802,7 +1822,7 @@ $jsonData = json_encode($params);
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
                   <td>是</td>
-                  <td>订单金额</td>
+                  <td>订单金额，单位为分</td>
                 </tr>
                 <tr>
                   <td><code>status</code></td>
