@@ -28,10 +28,18 @@ const menuItems = [
   { key: 'errorcode', title: '错误码' },
   { key: 'download', title: '示例代码' },
   { key: 'telegram', title: 'Telegram机器人' },
+  {
+    key: 'legacy',
+    title: '历史接口(V1)',
+    children: [
+      { key: 'legacy-pay', title: '代收下单(V1)' },
+      { key: 'legacy-transfer', title: '代付下单(V1)' },
+    ],
+  },
 ]
 
 // 默认展开代收/代付两个父级菜单
-const expandedKeys = ref(['pay', 'transfer'])
+const expandedKeys = ref(['pay', 'transfer', 'legacy'])
 
 function toggleExpand(key) {
   const idx = expandedKeys.value.indexOf(key)
@@ -439,7 +447,7 @@ $jsonData = json_encode($params);
         <div id="pay" class="section" v-show="activeMenu === 'pay-india'">
           <div class="content-header">
             <h2>代收下单</h2>
-            <p>代收（收款）接口，用于发起一笔收款订单。</p>
+            <p>代收（收款）接口，用于发起一笔收款订单。金额单位为「分」，与回调通知金额单位一致。</p>
           </div>
 
           <div class="card">
@@ -454,7 +462,7 @@ $jsonData = json_encode($params);
               <tbody>
                 <tr>
                   <td>请求 URL</td>
-                  <td><code>POST /unipay/pay</code></td>
+                  <td><code>POST /unipay/v2/pay</code></td>
                 </tr>
                 <tr>
                   <td>Content-Type</td>
@@ -492,7 +500,7 @@ $jsonData = json_encode($params);
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
                   <td>是</td>
-                  <td>支付金额，精度到分，最小0.01<br/>注意：签名时金额需去掉末尾多余的零，例如 100.00 应写成 100，100.10 应写成 100.1</td>
+                  <td>支付金额，单位为「分」。例如 10000 表示 100 元<br/>注意：签名时金额需去掉末尾多余的零，例如 10000.00 应写成 10000</td>
                 </tr>
                 <tr>
                   <td><code>currency</code></td>
@@ -558,7 +566,7 @@ $jsonData = json_encode($params);
               <pre><code>{
   "mchNo": "DC1010",
   "bizOrderNo": "ORDER_20260301001",
-  "amount": 100,
+  "amount": 10000,
   "currency": "INR",
   "reqTime": 1704067200000,
   "sign": "K2Jx8vM3nQ...",
@@ -568,6 +576,7 @@ $jsonData = json_encode($params);
   "returnUrl": "https://example.com/return"
 }</code></pre>
             </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 10000</code> 表示 100.00 INR（单位为分）。</p>
           </div>
 
           <div class="card">
@@ -594,7 +603,7 @@ $jsonData = json_encode($params);
                 <tr>
                   <td><code>status</code></td>
                   <td>String</td>
-                  <td>支付状态：pending（待支付）、success（成功）、fail（失败）</td>
+                  <td>支付状态：progress（支付中）、success（成功）、fail（失败）</td>
                 </tr>
                 <tr>
                   <td><code>payData</code></td>
@@ -614,7 +623,7 @@ $jsonData = json_encode($params);
                 <tr>
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
-                  <td>支付金额，单位为分</td>
+                  <td>支付金额，单位为「分」</td>
                 </tr>
               </tbody>
             </table>
@@ -633,7 +642,7 @@ $jsonData = json_encode($params);
     "payData": "https://pay.dcpay.com/...",
     "deeplinks": null,
     "extraParam": null,
-    "amount": "100"
+    "amount": "10000"
   }
 }</code></pre>
             </div>
@@ -652,7 +661,7 @@ $jsonData = json_encode($params);
     "payData": null,
     "deeplinks": "{\"upi\":\"upi://pay?pa=xxx@indus&...\",\"gpay\":\"tez://upi/pay?...\",\"phonepe\":\"phonepe://pay?...\",\"paytm\":\"paytmmp://pay?...\"}",
     "extraParam": null,
-    "amount": "100"
+    "amount": "10000"
   }
 }</code></pre>
             </div>
@@ -663,7 +672,7 @@ $jsonData = json_encode($params);
         <div id="transfer" class="section" v-show="activeMenu === 'transfer-india'">
           <div class="content-header">
             <h2>代付下单</h2>
-            <p>代付（转账）接口，用于向银行账户转账。</p>
+            <p>代付（转账）接口，用于向银行账户转账。金额单位为「分」，与回调通知金额单位一致。</p>
           </div>
 
           <div class="card">
@@ -678,7 +687,7 @@ $jsonData = json_encode($params);
               <tbody>
                 <tr>
                   <td>请求 URL</td>
-                  <td><code>POST /unipay/transfer</code></td>
+                  <td><code>POST /unipay/v2/transfer</code></td>
                 </tr>
                 <tr>
                   <td>Content-Type</td>
@@ -716,7 +725,7 @@ $jsonData = json_encode($params);
                   <td><code>amount</code></td>
                   <td>BigDecimal</td>
                   <td>是</td>
-                  <td>支付金额，精度到分，最小0.01<br/>注意：签名时金额需去掉末尾多余的零，例如 100.00 应写成 100，100.10 应写成 100.1</td>
+                  <td>代付金额，单位为「分」。例如 100000 表示 1000 元<br/>注意：签名时金额需去掉末尾多余的零，例如 100000.00 应写成 100000</td>
                 </tr>
                 <tr>
                   <td><code>currency</code></td>
@@ -836,7 +845,7 @@ $jsonData = json_encode($params);
               <pre><code>{
   "mchNo": "DC1010",
   "bizOrderNo": "TRANSFER_20260301001",
-  "amount": 1000,
+  "amount": 100000,
   "currency": "INR",
   "reqTime": 1704067200000,
   "sign": "K2Jx8vM3nQ...",
@@ -851,11 +860,12 @@ $jsonData = json_encode($params);
   "transferMode": "IMPS"
 }</code></pre>
             </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 100000</code> 表示 1000.00 INR（单位为分）。</p>
           </div>
 
           <div class="card">
             <h3>返回参数</h3>
-            <p>返回参数与代收下单相同，请参考代收下单返回参数说明。</p>
+            <p>返回参数与代收下单相同，请参考代收下单返回参数说明。金额单位为「分」。</p>
           </div>
 
           <div class="card">
@@ -867,10 +877,10 @@ $jsonData = json_encode($params);
   "data": {
     "bizOrderNo": "TRANSFER_20260301001",
     "orderNo": "DCDEV_T202603010001",
-    "status": "pending",
+    "status": "progress",
     "payData": null,
     "extraParam": null,
-    "amount": "1000"
+    "amount": "100000"
   }
 }</code></pre>
             </div>
@@ -896,7 +906,7 @@ $jsonData = json_encode($params);
               <tbody>
                 <tr>
                   <td>请求 URL</td>
-                  <td><code>POST /unipay/pay</code></td>
+                  <td><code>POST /unipay/v2/pay</code></td>
                 </tr>
                 <tr>
                   <td>Content-Type</td>
@@ -1054,7 +1064,7 @@ $jsonData = json_encode($params);
 
           <div class="card">
             <h3>下单说明</h3>
-            <p>请求接口 <code>POST /unipay/transfer</code>，Content-Type 为 <code>application/json</code>，签名算法 RSA2（见「签名规则」章节）。代付收款方式通过以下两个字段指定：</p>
+            <p>请求接口 <code>POST /unipay/v2/transfer</code>，Content-Type 为 <code>application/json</code>，签名算法 RSA2（见「签名规则」章节）。代付收款方式通过以下两个字段指定：</p>
             <ul>
               <li><code>currency</code> 取 <code>USD</code>，<code>amount</code> 单位为「分」。</li>
               <li><code>wayCode</code>（支付方式）为<strong>必传</strong>，<code>wayParam</code>（支付方式参数，JSON 对象）随 <code>wayCode</code> 不同而不同，也为<strong>必传</strong>。</li>
@@ -2722,6 +2732,465 @@ java -cp out src.queryBalance.QueryBalanceExample</code></pre>
               <li>订单查询仅支持查询绑定商户的订单</li>
               <li>如有问题请联系技术支持：<a href="https://t.me/feileabc" target="_blank">@feileabc</a></li>
             </ul>
+          </div>
+        </div>
+
+        <!-- 历史接口：代收下单(V1) -->
+        <div id="legacy-pay" class="section" v-show="activeMenu === 'legacy-pay'">
+          <div class="content-header">
+            <h2>代收下单（V1 历史接口）</h2>
+            <p>⚠️ 此为历史版本接口，金额单位为「元」。新商户请使用 V2 接口（<code>/unipay/v2/pay</code>，金额单位为「分」）。已接入商户可继续使用，接口永久保留。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/pay</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>支付金额，单位为「元」，精度到分，最小0.01<br/>注意：签名时金额需去掉末尾多余的零，例如 100.00 应写成 100，100.10 应写成 100.1</td>
+                </tr>
+                <tr>
+                  <td><code>currency</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>货币代码，如 INR（印度卢比）、USD</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，支付结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>returnUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>同步跳转地址，支付完成后跳转的页面</td>
+                </tr>
+                <tr>
+                  <td><code>expiredTime</code></td>
+                  <td>Long</td>
+                  <td>否</td>
+                  <td>订单过期时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，最大2048位</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1010",
+  "bizOrderNo": "ORDER_20260301001",
+  "amount": 100,
+  "currency": "INR",
+  "reqTime": 1704067200000,
+  "sign": "K2Jx8vM3nQ...",
+  "title": "测试订单",
+  "clientIp": "127.0.0.1",
+  "notifyUrl": "https://example.com/notify",
+  "returnUrl": "https://example.com/return"
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 100</code> 表示 100.00 INR（V1单位为元）。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>商户订单号</td>
+                </tr>
+                <tr>
+                  <td><code>orderNo</code></td>
+                  <td>String</td>
+                  <td>DCPAY 订单号</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>String</td>
+                  <td>支付状态：progress（支付中）、success（成功）、fail（失败）</td>
+                </tr>
+                <tr>
+                  <td><code>payData</code></td>
+                  <td>String</td>
+                  <td>收银台支付 URL</td>
+                </tr>
+                <tr>
+                  <td><code>deeplinks</code></td>
+                  <td>String</td>
+                  <td>UPI deeplink 链接</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>支付金额，单位为「元」</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bizOrderNo": "ORDER_20260301001",
+    "orderNo": "DCP202603010001",
+    "status": "progress",
+    "payData": "https://pay.dcpay.com/...",
+    "deeplinks": null,
+    "extraParam": null,
+    "amount": "100"
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>V1 与 V2 差异</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>对比项</th>
+                  <th>V1（/unipay/pay）</th>
+                  <th>V2（/unipay/v2/pay）</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>入参金额单位</td>
+                  <td>元</td>
+                  <td>分</td>
+                </tr>
+                <tr>
+                  <td>返回金额单位</td>
+                  <td>元</td>
+                  <td>分</td>
+                </tr>
+                <tr>
+                  <td>回调金额单位</td>
+                  <td>分</td>
+                  <td>分</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top: 8px;">V2 接口入参、出参、回调金额单位全部统一为「分」，不再有割裂。</p>
+          </div>
+        </div>
+
+        <!-- 历史接口：代付下单(V1) -->
+        <div id="legacy-transfer" class="section" v-show="activeMenu === 'legacy-transfer'">
+          <div class="content-header">
+            <h2>代付下单（V1 历史接口）</h2>
+            <p>⚠️ 此为历史版本接口，金额单位为「元」。新商户请使用 V2 接口（<code>/unipay/v2/transfer</code>，金额单位为「分」）。已接入商户可继续使用，接口永久保留。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/transfer</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>代付金额，单位为「元」，精度到分，最小0.01<br/>注意：签名时金额需去掉末尾多余的零</td>
+                </tr>
+                <tr>
+                  <td><code>currency</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>货币代码，如 INR（印度卢比）、USD</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址</td>
+                </tr>
+                <tr>
+                  <td><code>bankName</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>银行名称，最大200位</td>
+                </tr>
+                <tr>
+                  <td><code>accountNo</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>收款人账号（银行账号），最大50位</td>
+                </tr>
+                <tr>
+                  <td><code>accountName</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>收款人姓名，最大50位</td>
+                </tr>
+                <tr>
+                  <td><code>ifscCode</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>银行 IFSC 代码（印度银行），11位</td>
+                </tr>
+                <tr>
+                  <td><code>number</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>用户手机号码，最大20位</td>
+                </tr>
+                <tr>
+                  <td><code>transferMode</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>传输模式：IMPS、UPI（默认IMPS）</td>
+                </tr>
+                <tr>
+                  <td><code>vpa</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>VPA 地址（UPI 支付），最大50位</td>
+                </tr>
+                <tr>
+                  <td><code>wayCode</code></td>
+                  <td>String</td>
+                  <td>美国必传</td>
+                  <td>支付方式编码（美国通道）</td>
+                </tr>
+                <tr>
+                  <td><code>wayParam</code></td>
+                  <td>JSONObject</td>
+                  <td>美国必传</td>
+                  <td>支付方式参数（美国通道）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1010",
+  "bizOrderNo": "TRANSFER_20260301001",
+  "amount": 1000,
+  "currency": "INR",
+  "reqTime": 1704067200000,
+  "sign": "K2Jx8vM3nQ...",
+  "title": "代付转账",
+  "clientIp": "127.0.0.1",
+  "notifyUrl": "https://example.com/transfer/notify",
+  "bankName": "State Bank of India",
+  "accountNo": "1234567890123456",
+  "accountName": "John Doe",
+  "ifscCode": "SBIN0001234",
+  "transferMode": "IMPS"
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 1000</code> 表示 1000.00 INR（V1单位为元）。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bizOrderNo": "TRANSFER_20260301001",
+    "orderNo": "DCDEV_T202603010001",
+    "status": "progress",
+    "payData": null,
+    "extraParam": null,
+    "amount": "1000"
+  }
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">返回金额单位为「元」。回调通知金额单位为「分」。</p>
+          </div>
+
+          <div class="card">
+            <h3>V1 与 V2 差异</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>对比项</th>
+                  <th>V1（/unipay/transfer）</th>
+                  <th>V2（/unipay/v2/transfer）</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>入参金额单位</td>
+                  <td>元</td>
+                  <td>分</td>
+                </tr>
+                <tr>
+                  <td>返回金额单位</td>
+                  <td>元</td>
+                  <td>分</td>
+                </tr>
+                <tr>
+                  <td>回调金额单位</td>
+                  <td>分</td>
+                  <td>分</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top: 8px;">V2 接口入参、出参、回调金额单位全部统一为「分」，不再有割裂。</p>
           </div>
         </div>
       </section>
