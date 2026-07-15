@@ -13,6 +13,7 @@ const menuItems = [
       { key: 'pay-india', title: '印度通道' },
       { key: 'pay-usa', title: '美国通道' },
       { key: 'pay-nigeria', title: '尼日利亚通道' },
+      { key: 'pay-indonesia', title: '印度尼西亚通道' },
     ],
   },
   {
@@ -22,6 +23,7 @@ const menuItems = [
       { key: 'transfer-india', title: '印度通道' },
       { key: 'transfer-usa', title: '美国通道' },
       { key: 'transfer-nigeria', title: '尼日利亚通道' },
+      { key: 'transfer-indonesia', title: '印度尼西亚通道' },
     ],
   },
   { key: 'query', title: '订单查询' },
@@ -1751,6 +1753,355 @@ $jsonData = json_encode($params);
           <div class="card">
             <h3>回调与查询</h3>
             <p>代付结果通过「回调通知」推送，商户也可调用「订单查询」接口主动查询。回调与查询返回的金额单位为「分」（kobo）。</p>
+          </div>
+        </div>
+
+        <!-- 印度尼西亚代收下单 -->
+        <div id="pay-indonesia" class="section" v-show="activeMenu === 'pay-indonesia'">
+          <div class="content-header">
+            <h2>代收下单 · 印度尼西亚通道</h2>
+            <p>代收（收款）接口，用于发起一笔印度尼西亚卢比（IDR）收款订单。金额单位为「分」，与回调通知金额单位一致。例如 1000000 表示 10000.00 IDR。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/v2/pay</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+                <tr>
+                  <td>签名算法</td>
+                  <td>RSA2（SHA256WithRSA），见「签名规则」章节</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>支付金额，单位为「分」。例如 1000000 表示 10000.00 IDR<br/>注意：签名时金额需去掉末尾多余的零</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>pay_type</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付方式。可选值：<code>dana</code>, <code>qris</code>, <code>bri</code>, <code>bni</code>。不传则由系统自动分配</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，支付结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>returnUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>同步跳转地址，支付完成后跳转的页面</td>
+                </tr>
+                <tr>
+                  <td><code>expiredTime</code></td>
+                  <td>Long</td>
+                  <td>否</td>
+                  <td>订单过期时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，最大2048位</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1090",
+  "bizOrderNo": "ORDER_ID_20260801001",
+  "amount": 1000000,
+  "reqTime": 1751385600000,
+  "sign": "K2Jx8vM3nQ...",
+  "pay_type": "qris",
+  "title": "Indonesia Pay",
+  "clientIp": "127.0.0.1",
+  "notifyUrl": "https://example.com/notify",
+  "returnUrl": "https://example.com/return"
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 1000000</code> 表示 10000.00 IDR（单位为分）。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回参数</h3>
+            <p>返回参数与印度通道代收下单相同，请参考印度通道代收下单返回参数说明。</p>
+            <p>下单成功后返回 <code>payData</code>（收银台支付链接），商户需将付款人重定向到该 URL 完成支付。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bizOrderNo": "ORDER_ID_20260801001",
+    "orderNo": "DCP202608010001",
+    "status": "progress",
+    "payData": "https://pay.example.com/...",
+    "deeplinks": null,
+    "extraParam": null,
+    "amount": "1000000"
+  }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- 印度尼西亚代付下单 -->
+        <div id="transfer-indonesia" class="section" v-show="activeMenu === 'transfer-indonesia'">
+          <div class="content-header">
+            <h2>代付下单 · 印度尼西亚通道</h2>
+            <p>代付（转账）接口，用于向印度尼西亚银行账户或电子钱包转账。金额单位为「分」，与回调通知金额单位一致。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/v2/transfer</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+                <tr>
+                  <td>签名算法</td>
+                  <td>RSA2（SHA256WithRSA），见「签名规则」章节</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>代付金额，单位为「分」。例如 1000000 表示 10000.00 IDR<br/>注意：签名时金额需去掉末尾多余的零</td>
+                </tr>
+                <tr>
+                  <td><code>type</code></td>
+                  <td>Integer</td>
+                  <td>是</td>
+                  <td>代付类型。<code>1</code> = 银行转账</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，代付结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>expiredTime</code></td>
+                  <td>Long</td>
+                  <td>否</td>
+                  <td>订单过期时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，最大2048位</td>
+                </tr>
+                <tr>
+                  <td><code>bankName</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>银行/钱包代码（印尼通道需传固定枚举值）。电子钱包：<code>ovo</code>, <code>shopeepay</code>, <code>dana</code>, <code>gopay</code>, <code>linkaja</code>。<br/>银行：<code>bca</code>, <code>bri</code>, <code>cimb</code>, <code>danamon</code>, <code>mega</code>, <code>ocbc</code>, <code>mandiri</code>, <code>bni</code>, <code>btpn</code>, <code>bsi</code>, <code>permata</code>, <code>panin</code>, <code>maybank</code>, <code>hsbc</code>, <code>citibank</code>, <code>artos</code>, <code>seabank</code>。<br/><strong>注意：bankName 仅支持以上枚举值，大小写敏感，填错将无法打款成功。</strong></td>
+                </tr>
+                <tr>
+                  <td><code>accountNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>收款人银行账号或电子钱包号</td>
+                </tr>
+                <tr>
+                  <td><code>accountName</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>收款人姓名</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1090",
+  "bizOrderNo": "TRANSFER_ID_20260801001",
+  "amount": 1000000,
+  "type": 1,
+  "reqTime": 1751385600000,
+  "sign": "K2Jx8vM3nQ...",
+  "title": "Indonesia Payout",
+  "clientIp": "127.0.0.1",
+  "notifyUrl": "https://example.com/transfer/notify",
+  "bankName": "bca",
+  "accountNo": "1234567890",
+  "accountName": "Budi Santoso"
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 1000000</code> 表示 10000.00 IDR（单位为分）。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回参数</h3>
+            <p>返回参数与印度通道代付下单相同，请参考印度通道代付下单返回参数说明。金额单位为「分」。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bizOrderNo": "TRANSFER_ID_20260801001",
+    "orderNo": "DCT202608010001",
+    "status": "progress",
+    "payData": null,
+    "extraParam": null,
+    "amount": "1000000"
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>回调与查询</h3>
+            <p>代付结果通过「回调通知」推送，商户也可调用「订单查询」接口主动查询。回调与查询返回的金额单位为「分」。</p>
           </div>
         </div>
 
