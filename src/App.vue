@@ -14,6 +14,7 @@ const menuItems = [
       { key: 'pay-usa', title: '美国通道' },
       { key: 'pay-nigeria', title: '尼日利亚通道' },
       { key: 'pay-indonesia', title: '印度尼西亚通道' },
+      { key: 'pay-bangladesh', title: '孟加拉通道' },
     ],
   },
   {
@@ -24,6 +25,7 @@ const menuItems = [
       { key: 'transfer-usa', title: '美国通道' },
       { key: 'transfer-nigeria', title: '尼日利亚通道' },
       { key: 'transfer-indonesia', title: '印度尼西亚通道' },
+      { key: 'transfer-bangladesh', title: '孟加拉通道' },
     ],
   },
   { key: 'query', title: '订单查询' },
@@ -1922,6 +1924,44 @@ $jsonData = json_encode($params);
           </div>
         </div>
 
+        <!-- 孟加拉代收下单 -->
+        <div id="pay-bangladesh" class="section" v-show="activeMenu === 'pay-bangladesh'">
+          <div class="content-header">
+            <h2>代收下单 · 孟加拉通道</h2>
+            <p>代收（收款）接口，用于发起一笔孟加拉塔卡（BDT）收款订单。金额单位为「分」，与回调通知金额单位一致。例如 100000 表示 1000.00 BDT。</p>
+            <p>孟加拉通道支持 Nagad 和 Bkash 两种电子钱包。下单后系统返回收银台页面链接，用户在收银台页面选择钱包后完成支付。</p>
+          </div>
+          <div class="api-section">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead><tr><th>参数名</th><th>类型</th><th>必须</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>mchNo</td><td>String</td><td>是</td><td>商户号</td></tr>
+                <tr><td>bizOrderNo</td><td>String</td><td>是</td><td>商户订单号（唯一）</td></tr>
+                <tr><td>amount</td><td>String</td><td>是</td><td>金额，单位：分（BDT×100）。如 100000 表示 1000 BDT</td></tr>
+                <tr><td>wayCode</td><td>String</td><td>否</td><td>钱包类型：<code>bkash</code> 或 <code>nagad</code>。传入后直接请求对应钱包支付链接，不走收银台选择页。不传则返回 DCPay 收银台让用户选择</td></tr>
+                <tr><td>notifyUrl</td><td>String</td><td>是</td><td>异步回调地址</td></tr>
+                <tr><td>reqTime</td><td>String</td><td>是</td><td>请求时间戳（毫秒）</td></tr>
+                <tr><td>sign</td><td>String</td><td>是</td><td>签名</td></tr>
+              </tbody>
+            </table>
+            <h3>响应示例</h3>
+            <pre class="code-block"><code>{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "orderNo": "P2024xxxx",
+    "bizOrderNo": "M2024xxxx",
+    "payData": "https://gateway.dcpay.me/cashier/bdt?orderNo=P2024xxxx&amount=100000",
+    "status": "progress"
+  }
+}</code></pre>
+            <div class="tip-box">
+              <strong>提示：</strong>payData 返回的是 DCPay 收银台页面链接。用户打开后选择 Nagad 或 Bkash 钱包完成支付。
+            </div>
+          </div>
+        </div>
+
         <!-- 印度尼西亚代付下单 -->
         <div id="transfer-indonesia" class="section" v-show="activeMenu === 'transfer-indonesia'">
           <div class="content-header">
@@ -1984,12 +2024,6 @@ $jsonData = json_encode($params);
                   <td>BigDecimal</td>
                   <td>是</td>
                   <td>代付金额，单位为「分」。例如 1000000 表示 10000.00 IDR<br/>注意：签名时金额需去掉末尾多余的零</td>
-                </tr>
-                <tr>
-                  <td><code>type</code></td>
-                  <td>Integer</td>
-                  <td>是</td>
-                  <td>代付类型。<code>1</code> = 银行转账</td>
                 </tr>
                 <tr>
                   <td><code>reqTime</code></td>
@@ -2062,7 +2096,6 @@ $jsonData = json_encode($params);
   "mchNo": "DC1090",
   "bizOrderNo": "TRANSFER_ID_20260801001",
   "amount": 1000000,
-  "type": 1,
   "reqTime": 1751385600000,
   "sign": "K2Jx8vM3nQ...",
   "title": "Indonesia Payout",
@@ -2101,6 +2134,45 @@ $jsonData = json_encode($params);
 
           <div class="card">
             <h3>回调与查询</h3>
+            <p>代付结果通过「回调通知」推送，商户也可调用「订单查询」接口主动查询。回调与查询返回的金额单位为「分」。</p>
+          </div>
+        </div>
+
+        <!-- 孟加拉代付下单 -->
+        <div id="transfer-bangladesh" class="section" v-show="activeMenu === 'transfer-bangladesh'">
+          <div class="content-header">
+            <h2>代付下单 · 孟加拉通道</h2>
+            <p>代付（转账）接口，用于向孟加拉 Nagad 或 Bkash 电子钱包转账。金额单位为「分」，与回调通知金额单位一致。</p>
+          </div>
+          <div class="api-section">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead><tr><th>参数名</th><th>类型</th><th>必须</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>mchNo</td><td>String</td><td>是</td><td>商户号</td></tr>
+                <tr><td>bizOrderNo</td><td>String</td><td>是</td><td>商户订单号（唯一）</td></tr>
+                <tr><td>amount</td><td>String</td><td>是</td><td>金额，单位：分（BDT×100）。如 100000 表示 1000 BDT。必须为整数</td></tr>
+                <tr><td>accountNo</td><td>String</td><td>是</td><td>收款钱包号码（手机号）</td></tr>
+                <tr><td>accountName</td><td>String</td><td>是</td><td>收款人姓名</td></tr>
+                <tr><td>bankName</td><td>String</td><td>是</td><td>钱包类型：<code>nagad</code> 或 <code>bkash</code>（小写，必须精确匹配）</td></tr>
+                <tr><td>notifyUrl</td><td>String</td><td>是</td><td>异步回调地址</td></tr>
+                <tr><td>reqTime</td><td>String</td><td>是</td><td>请求时间戳（毫秒）</td></tr>
+                <tr><td>sign</td><td>String</td><td>是</td><td>签名</td></tr>
+              </tbody>
+            </table>
+            <div class="tip-box">
+              <strong>重要：</strong>bankName 字段必须为 <code>nagad</code> 或 <code>bkash</code>（全部小写），填写错误将导致打款失败。
+            </div>
+            <h3>响应示例</h3>
+            <pre class="code-block"><code>{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "orderNo": "T2024xxxx",
+    "bizOrderNo": "M2024xxxx",
+    "status": "progress"
+  }
+}</code></pre>
             <p>代付结果通过「回调通知」推送，商户也可调用「订单查询」接口主动查询。回调与查询返回的金额单位为「分」。</p>
           </div>
         </div>
