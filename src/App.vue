@@ -2152,7 +2152,7 @@ $jsonData = json_encode($params);
                 <tr><td>mchNo</td><td>String</td><td>是</td><td>商户号</td></tr>
                 <tr><td>bizOrderNo</td><td>String</td><td>是</td><td>商户订单号（唯一）</td></tr>
                 <tr><td>amount</td><td>String</td><td>是</td><td>金额，单位：分（BDT×100）。如 100000 表示 1000 BDT。必须为整数</td></tr>
-                <tr><td>accountNo</td><td>String</td><td>是</td><td>收款钱包号码（手机号）</td></tr>
+                <tr><td>accountNo</td><td>String</td><td>是</td><td>收款钱包号码（手机号），0开头的11位手机号，如 <code>01712345678</code></td></tr>
                 <tr><td>accountName</td><td>String</td><td>是</td><td>收款人姓名</td></tr>
                 <tr><td>bankName</td><td>String</td><td>是</td><td>钱包类型：<code>nagad</code> 或 <code>bkash</code>（小写，必须精确匹配）</td></tr>
                 <tr><td>notifyUrl</td><td>String</td><td>是</td><td>异步回调地址</td></tr>
