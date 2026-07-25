@@ -83,7 +83,6 @@ function downloadDemo() {
         <nav class="nav">
           <ul>
             <li><a href="https://dcpay.me/" target="_blank">商户端登录</a></li>
-            <li><a href="https://t.me/feileabc" target="_blank">技术支持</a></li>
           </ul>
         </nav>
       </div>
@@ -3489,7 +3488,6 @@ java -cp out src.queryBalance.QueryBalanceExample</code></pre>
             <ul>
               <li>每个 Telegram 账号只能绑定一个商户</li>
               <li>订单查询仅支持查询绑定商户的订单</li>
-              <li>如有问题请联系技术支持：<a href="https://t.me/feileabc" target="_blank">@feileabc</a></li>
             </ul>
           </div>
         </div>
