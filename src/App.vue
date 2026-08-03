@@ -15,6 +15,7 @@ const menuItems = [
       { key: 'pay-nigeria', title: '尼日利亚通道' },
       { key: 'pay-indonesia', title: '印度尼西亚通道' },
       { key: 'pay-bangladesh', title: '孟加拉通道' },
+      { key: 'pay-philippines', title: '菲律宾通道' },
     ],
   },
   {
@@ -26,6 +27,7 @@ const menuItems = [
       { key: 'transfer-nigeria', title: '尼日利亚通道' },
       { key: 'transfer-indonesia', title: '印度尼西亚通道' },
       { key: 'transfer-bangladesh', title: '孟加拉通道' },
+      { key: 'transfer-philippines', title: '菲律宾通道' },
     ],
   },
   { key: 'query', title: '订单查询' },
@@ -2174,6 +2176,490 @@ $jsonData = json_encode($params);
 }</code></pre>
             <p>代付结果通过「回调通知」推送，商户也可调用「订单查询」接口主动查询。回调与查询返回的金额单位为「分」。</p>
           </div>
+        </div>
+
+        <!-- 菲律宾代收下单 -->
+        <div id="pay-philippines" class="section" v-show="activeMenu === 'pay-philippines'">
+          <div class="content-header">
+            <h2>代收下单 · 菲律宾通道</h2>
+            <p>代收（收款）接口，用于发起一笔菲律宾比索（PHP）收款订单。金额单位为「分」，与回调通知金额单位一致。例如 100000 表示 1000.00 PHP。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/v2/pay</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+                <tr>
+                  <td>签名方式</td>
+                  <td>RSA2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>支付金额，单位为「分」（PHP×100）。例如 100000 表示 1000.00 PHP<br/>注意：签名时金额需去掉末尾多余的零</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，支付结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>returnUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>同步跳转地址，支付完成后跳转的页面</td>
+                </tr>
+                <tr>
+                  <td><code>expiredTime</code></td>
+                  <td>Long</td>
+                  <td>否</td>
+                  <td>订单过期时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，最大2048位</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1088",
+  "bizOrderNo": "ORDER_PH_20260729001",
+  "amount": 500000,
+  "reqTime": 1722245400000,
+  "sign": "K2Jx8vM3nQ...",
+  "title": "菲律宾代收测试",
+  "notifyUrl": "https://example.com/notify",
+  "returnUrl": "https://example.com/return"
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 500000</code> 表示 5000.00 PHP（单位为分）。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>商户订单号</td>
+                </tr>
+                <tr>
+                  <td><code>orderNo</code></td>
+                  <td>String</td>
+                  <td>DCPAY 订单号</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>String</td>
+                  <td>支付状态：progress（支付中）、success（成功）、fail（失败）</td>
+                </tr>
+                <tr>
+                  <td><code>payData</code></td>
+                  <td>String</td>
+                  <td>支付链接 URL，引导用户打开完成支付</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>支付扩展参数</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "bizOrderNo": "ORDER_PH_20260729001",
+    "orderNo": "DCP202607290001",
+    "status": "progress",
+    "payData": "https://pay.example.com/checkout/...",
+    "extraParam": null
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="tip-box">
+            <strong>提示：</strong>payData 返回的是上游支付链接，请引导用户在浏览器中打开完成支付。支付完成后系统会向 notifyUrl 推送回调通知。
+          </div>
+        </div>
+
+        <!-- 菲律宾代付下单 -->
+        <div id="transfer-philippines" class="section" v-show="activeMenu === 'transfer-philippines'">
+          <div class="content-header">
+            <h2>代付下单 · 菲律宾通道</h2>
+            <p>代付（转账）接口，用于向菲律宾银行账户或电子钱包（GCash等）转账。金额单位为「分」，与回调通知金额单位一致。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/v2/transfer</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+                <tr>
+                  <td>签名方式</td>
+                  <td>RSA2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，商户侧唯一标识，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>BigDecimal</td>
+                  <td>是</td>
+                  <td>转账金额，单位为「分」（PHP×100）。例如 500000 表示 5000.00 PHP</td>
+                </tr>
+                <tr>
+                  <td><code>accountNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>收款账号（银行卡号或电子钱包号码）</td>
+                </tr>
+                <tr>
+                  <td><code>accountName</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>收款人姓名</td>
+                </tr>
+                <tr>
+                  <td><code>bankCode</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>银行代码 Bank Code，参见下方编码表，注意大小写</td>
+                </tr>
+                <tr>
+                  <td><code>reqTime</code></td>
+                  <td>Long</td>
+                  <td>是</td>
+                  <td>请求时间，13位时间戳（毫秒）</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+                <tr>
+                  <td><code>title</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>转账标题，最大100位</td>
+                </tr>
+                <tr>
+                  <td><code>clientIp</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>客户端 IP 地址</td>
+                </tr>
+                <tr>
+                  <td><code>notifyUrl</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>异步通知地址，转账结果会通知到该地址</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>扩展参数，最大2048位</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1088",
+  "bizOrderNo": "TRANSFER_PH_001",
+  "amount": 500000,
+  "accountNo": "09171234567",
+  "accountName": "JUAN DELA CRUZ",
+  "bankCode": "PH_GCASH",
+  "reqTime": 1722245400000,
+  "sign": "K2Jx8vM3nQ...",
+  "notifyUrl": "https://example.com/notify"
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;">说明：<code>amount: 500000</code> 表示 5000.00 PHP（单位为分）；<code>bankCode: "PH_GCASH"</code> 表示 GCash 电子钱包。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>商户订单号</td>
+                </tr>
+                <tr>
+                  <td><code>orderNo</code></td>
+                  <td>String</td>
+                  <td>DCPAY 订单号</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>String</td>
+                  <td>转账状态：progress（处理中）、success（成功）、fail（失败）</td>
+                </tr>
+                <tr>
+                  <td><code>extraParam</code></td>
+                  <td>String</td>
+                  <td>扩展参数</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>返回示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "bizOrderNo": "TRANSFER_PH_001",
+    "orderNo": "DCP202607290002",
+    "status": "progress",
+    "extraParam": null
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>菲律宾银行编码表（bankCode 字段取值）</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>代码（bankCode）</th>
+                  <th>描述</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>PH_ALB</code></td><td>AllBank (A Thrift Bank), Inc.</td></tr>
+                <tr><td><code>PH_APY</code></td><td>Alipay / Lazada Wallet</td></tr>
+                <tr><td><code>PH_AUB</code></td><td>Asia United Bank Corporation</td></tr>
+                <tr><td><code>PH_BCH</code></td><td>Bank of China</td></tr>
+                <tr><td><code>PH_BDO</code></td><td>BDO Unibank</td></tr>
+                <tr><td><code>PH_BGB</code></td><td>BanKo, A Subsidiary of BPI</td></tr>
+                <tr><td><code>PH_BMB</code></td><td>Bangko Mabuhay</td></tr>
+                <tr><td><code>PH_BOC</code></td><td>Bank of Commerce</td></tr>
+                <tr><td><code>PH_BPI</code></td><td>BPI / BPI Family Savings Bank</td></tr>
+                <tr><td><code>PH_BRB</code></td><td>Binangonan Rural Bank (BRBDigital)</td></tr>
+                <tr><td><code>PH_CBC</code></td><td>China Banking Corporation</td></tr>
+                <tr><td><code>PH_CBS</code></td><td>China Bank Savings, Inc.</td></tr>
+                <tr><td><code>PH_CCB</code></td><td>CTBC Bank (Philippines) Corporation</td></tr>
+                <tr><td><code>PH_CIS</code></td><td>Bayad</td></tr>
+                <tr><td><code>PH_CLB</code></td><td>Cebuana Lhuillier Bank / Cebuana Xpress</td></tr>
+                <tr><td><code>PH_CMG</code></td><td>Camalig Bank</td></tr>
+                <tr><td><code>PH_CPI</code></td><td>CIMB Philippines, Inc.</td></tr>
+                <tr><td><code>PH_CRD</code></td><td>CARD Bank Inc.</td></tr>
+                <tr><td><code>PH_DBI</code></td><td>Dungganon Bank (A Microfinance Rural Bank), Inc.</td></tr>
+                <tr><td><code>PH_DBP</code></td><td>Development Bank of the Philippines</td></tr>
+                <tr><td><code>PH_DCB</code></td><td>Dumaguete City Development Bank</td></tr>
+                <tr><td><code>PH_DCP</code></td><td>Coins.ph (DCPay)</td></tr>
+                <tr><td><code>PH_EQB</code></td><td>Equicom Savings Bank, Inc.</td></tr>
+                <tr><td><code>PH_ERB</code></td><td>Entrepreneur Rural Bank, Inc./ENTRP</td></tr>
+                <tr><td><code>PH_EWB</code></td><td>East West Banking Corporation</td></tr>
+                <tr><td><code>PH_EWR</code></td><td>Komo / EastWest Rural Bank</td></tr>
+                <tr><td><code>PH_GBY</code></td><td>GrabPay</td></tr>
+                <tr><td><code>PH_GCASH</code></td><td>GCash</td></tr>
+                <tr><td><code>PH_GOT</code></td><td>GoTyme Bank</td></tr>
+                <tr><td><code>PH_IEM</code></td><td>Infoserve / Nationlink</td></tr>
+                <tr><td><code>PH_ING</code></td><td>ING Bank N.V.</td></tr>
+                <tr><td><code>PH_IRI</code></td><td>I-Remit / iCASH</td></tr>
+                <tr><td><code>PH_ISL</code></td><td>ISLA Bank (A Thrift Bank), Inc.</td></tr>
+                <tr><td><code>PH_LBP</code></td><td>LANDBANK / OFBank</td></tr>
+                <tr><td><code>PH_LDB</code></td><td>Luzon Development Bank</td></tr>
+                <tr><td><code>PH_LSB</code></td><td>Legazpi Savings Bank</td></tr>
+                <tr><td><code>PH_MCB</code></td><td>Mindanao Consolidated CoopBank</td></tr>
+                <tr><td><code>PH_MET</code></td><td>Metropolitan Bank and Trust Co.</td></tr>
+                <tr><td><code>PH_MPI</code></td><td>Maybank Philippines, Inc.</td></tr>
+                <tr><td><code>PH_MSB</code></td><td>Malayan Bank Savings and Mortgage Bank, Inc.</td></tr>
+                <tr><td><code>PH_MYA</code></td><td>Maya Bank, Inc.</td></tr>
+                <tr><td><code>PH_NBK</code></td><td>Netbank</td></tr>
+                <tr><td><code>PH_ONB</code></td><td>BDO Network Bank</td></tr>
+                <tr><td><code>PH_OPI</code></td><td>OmniPay, Inc.</td></tr>
+                <tr><td><code>PH_PAR</code></td><td>Partner Rural Bank (Cotabato), Inc.</td></tr>
+                <tr><td><code>PH_PAS</code></td><td>Pacific Ace Savings Bank</td></tr>
+                <tr><td><code>PH_PBB</code></td><td>Philippine Business Bank, Inc., A Savings Bank</td></tr>
+                <tr><td><code>PH_PBC</code></td><td>Philippine Bank of Communications</td></tr>
+                <tr><td><code>PH_PNB</code></td><td>Philippine National Bank (PNB)</td></tr>
+                <tr><td><code>PH_PPI</code></td><td>PayMaya Philippines, Inc.</td></tr>
+                <tr><td><code>PH_PPS</code></td><td>PalawanPay</td></tr>
+                <tr><td><code>PH_PRB</code></td><td>Producers Bank</td></tr>
+                <tr><td><code>PH_PSB</code></td><td>Philippine Savings Bank</td></tr>
+                <tr><td><code>PH_PTC</code></td><td>Philippine Trust Company</td></tr>
+                <tr><td><code>PH_PVB</code></td><td>Philippine Veterans Bank</td></tr>
+                <tr><td><code>PH_QCB</code></td><td>Queenbank</td></tr>
+                <tr><td><code>PH_QRB</code></td><td>Quezon Capital Rural Bank</td></tr>
+                <tr><td><code>PH_RBG</code></td><td>Asenso</td></tr>
+                <tr><td><code>PH_RBN</code></td><td>Robinsons Bank Corporation</td></tr>
+                <tr><td><code>PH_RCI</code></td><td>RCBC/DiskarTech</td></tr>
+                <tr><td><code>PH_SBA</code></td><td>Sterling Bank of Asia, Inc (A Savings Bank)</td></tr>
+                <tr><td><code>PH_SCB</code></td><td>Standard Chartered Bank</td></tr>
+                <tr><td><code>PH_SEA</code></td><td>Seabank</td></tr>
+                <tr><td><code>PH_SEC</code></td><td>Security Bank Corporation</td></tr>
+                <tr><td><code>PH_SME</code></td><td>CARD SME Bank</td></tr>
+                <tr><td><code>PH_SPP</code></td><td>ShopeePay</td></tr>
+                <tr><td><code>PH_SPY</code></td><td>Starpay</td></tr>
+                <tr><td><code>PH_SSB</code></td><td>Sun Savings Bank, Inc.</td></tr>
+                <tr><td><code>PH_TCI</code></td><td>TayoCash</td></tr>
+                <tr><td><code>PH_TDB</code></td><td>Tonik Bank</td></tr>
+                <tr><td><code>PH_TPI</code></td><td>TraxionPay/DigiCOOP/COOPNET</td></tr>
+                <tr><td><code>PH_UBP</code></td><td>Union Bank of the Philippines</td></tr>
+                <tr><td><code>PH_UCP</code></td><td>United Coconut Planters Bank (UCPB)</td></tr>
+                <tr><td><code>PH_UDB</code></td><td>UnionDigital Bank</td></tr>
+                <tr><td><code>PH_UMS</code></td><td>USSC Money Services</td></tr>
+                <tr><td><code>PH_UNO</code></td><td>UNObank</td></tr>
+                <tr><td><code>PH_USB</code></td><td>UCPB Savings Bank</td></tr>
+                <tr><td><code>PH_WDB</code></td><td>Wealth Development Bank</td></tr>
+                <tr><td><code>PH_ZTI</code></td><td>JuanCash (Zybi Tech Inc.)</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tip-box">
+            <strong>提示：</strong>常用编码：GCash 用 <code>PH_GCASH</code>，Maya 用 <code>PH_PPI</code>，BDO 用 <code>PH_BDO</code>，BPI 用 <code>PH_BPI</code>，Metrobank 用 <code>PH_MET</code>，UnionBank 用 <code>PH_UBP</code>，LandBank 用 <code>PH_LBP</code>。
+          </div>
+
+          <p>代付结果通过「回调通知」异步推送到 notifyUrl，商户也可调用「订单查询」接口主动查询。</p>
         </div>
 
         <!-- 订单查询 -->
