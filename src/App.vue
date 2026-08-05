@@ -30,9 +30,10 @@ const menuItems = [
       { key: 'transfer-philippines', title: '菲律宾通道' },
     ],
   },
-  { key: 'query', title: '订单查询' },
-  { key: 'balance', title: '商户余额查询' },
   { key: 'notify', title: '回调通知' },
+  { key: 'query', title: '订单查询' },
+  { key: 'utr-repair', title: 'UTR补单' },
+  { key: 'balance', title: '商户余额查询' },
   { key: 'errorcode', title: '错误码' },
   { key: 'download', title: '示例代码' },
   { key: 'telegram', title: 'Telegram机器人' },
@@ -2859,6 +2860,213 @@ $jsonData = json_encode($params);
   }
 }</code></pre>
             </div>
+          </div>
+        </div>
+
+        <!-- UTR补单 -->
+        <div id="utr-repair" class="section" v-show="activeMenu === 'utr-repair'">
+          <div class="content-header">
+            <h2>UTR补单</h2>
+            <p>UTR补单接口，适用于印度代收订单。商户可通过提交UTR号主动发起补单查询，系统将向上游通道确认该笔交易并尝试完成入账。</p>
+          </div>
+
+          <div class="card">
+            <h3>请求信息</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>项目</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>请求 URL</td>
+                  <td><code>POST /unipay/v2/utrRepair</code></td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td><code>application/json</code></td>
+                </tr>
+                <tr>
+                  <td>签名算法</td>
+                  <td>RSA2（SHA256WithRSA），见「签名规则」章节</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>接口说明</h3>
+            <ul>
+              <li>仅适用于<strong>印度代收</strong>订单（UPI 交易），其他国家/地区订单调用将返回 <code>status=6</code>（当前通道暂未配置UTR补单处理）。</li>
+              <li>当代收订单状态仍为「支付中」（progress），且用户已完成 UPI 转账并获得 UTR 号时，可调用此接口请求补单。</li>
+              <li>补单结果以 <code>status</code> 字段区分（见下方状态码表），<strong>status=2</strong> 表示补单请求已受理、处理中，最终结果以后续回调或订单查询为准。</li>
+              <li>此接口可安全重复调用（幂等），不会导致重复入账。</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>请求参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mchNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户号，由 DCPAY 分配</td>
+                </tr>
+                <tr>
+                  <td><code>bizOrderNo</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>商户订单号，需为已下单的代收订单</td>
+                </tr>
+                <tr>
+                  <td><code>utr</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>UTR号（UPI Transaction Reference），12位数字</td>
+                </tr>
+                <tr>
+                  <td><code>sign</code></td>
+                  <td>String</td>
+                  <td>是</td>
+                  <td>签名值，使用 RSA2 签名</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>请求示例</h3>
+            <div class="code-block">
+              <pre><code>{
+  "mchNo": "DC1010",
+  "bizOrderNo": "ORDER_20260801001",
+  "utr": "412345678901",
+  "sign": "K2Jx8vM3nQ..."
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>返回参数</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>Integer</td>
+                  <td>补单状态码（见下表）</td>
+                </tr>
+                <tr>
+                  <td><code>data</code></td>
+                  <td>String</td>
+                  <td>补单结果描述</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>补单状态码</h3>
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>status</th>
+                  <th>含义</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>1</code></td>
+                  <td>补单成功</td>
+                  <td>UTR匹配成功，订单已入账，状态将变为 success</td>
+                </tr>
+                <tr>
+                  <td><code>2</code></td>
+                  <td>补单处理中</td>
+                  <td>请求已受理，正在匹配中，请稍后查询订单状态</td>
+                </tr>
+                <tr>
+                  <td><code>3</code></td>
+                  <td>订单不存在</td>
+                  <td>商户订单号未找到对应代收订单</td>
+                </tr>
+                <tr>
+                  <td><code>4</code></td>
+                  <td>UTR未找到</td>
+                  <td>上游通道未查询到该 UTR 对应的交易</td>
+                </tr>
+                <tr>
+                  <td><code>5</code></td>
+                  <td>UTR已存在但不属于该订单</td>
+                  <td>该 UTR 已关联到其他订单</td>
+                </tr>
+                <tr>
+                  <td><code>6</code></td>
+                  <td>补单失败</td>
+                  <td>该订单所走通道暂不支持接口补单，请将订单号和 UTR 发送到 Telegram 对接群中进行人工补单</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>返回示例（处理中）</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "status": 2,
+    "data": "订单匹配成功，请稍后确认订单状态。"
+  },
+  "sign": "..."
+}</code></pre>
+            </div>
+            <p style="margin-top: 8px;"><strong>说明：</strong><code>status=2</code> 且 <code>data=订单匹配成功，请稍后确认订单状态。</code> 表示补单请求已受理，最终订单状态仍以后续查询或回调结果为准。</p>
+          </div>
+
+          <div class="card">
+            <h3>返回示例（通道不支持）</h3>
+            <div class="code-block">
+              <pre><code>{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "status": 6,
+    "data": "当前通道暂未配置UTR补单处理"
+  },
+  "sign": "..."
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>注意事项</h3>
+            <ul>
+              <li><code>status=2</code> 不代表最终成功，商户需继续轮询订单查询接口或等待回调通知确认最终状态。</li>
+              <li>建议商户在收到 <code>status=2</code> 后，间隔 10-30 秒后调用订单查询接口确认最终结果。</li>
+              <li>若通道返回 <code>status=4</code>（UTR未找到），建议商户核实 UTR 号是否正确后重试。</li>
+              <li>此接口可重复调用，已成功入账的订单再次调用不会重复入账。</li>
+            </ul>
           </div>
         </div>
 
