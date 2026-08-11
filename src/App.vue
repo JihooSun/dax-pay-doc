@@ -920,7 +920,7 @@ $jsonData = json_encode($params);
               <li><code>currency</code> 取 <code>USD</code>，<code>amount</code> 单位为「分」（如 <code>1000</code> 表示 10.00 USD）。</li>
               <li>采用<strong>收银台模式</strong>：下单成功后返回收银台 URL（<code>payData</code>），商户需将付款人重定向到该 URL，由付款人在收银台内选择具体支付方式并完成付款。</li>
             </ul>
-            <p><strong>关于支付方式：</strong>代收下单<strong>无需</strong>传 <code>wayCode</code>。付款人实际使用的支付方式由通道在回调中上报（回调参数 <code>wayCode</code>）。收银台当前支持的支付方式包括 CashApp、Apple Pay、Google Pay、PayPal 等；具体为某商户开通哪些、对应费率多少，以对接群 / 管理员确认为准。</p>
+            <p><strong>关于支付方式：</strong>代收下单时可选传 <code>wayCode</code> 指定支付方式。若传入，付款人将直接进入对应支付方式页面；若不传，付款人在收银台内自行选择。付款人实际使用的支付方式由通道在回调中上报（回调参数 <code>wayCode</code>）。收银台当前支持的支付方式包括 CashApp、Apple Pay、Google Pay、PayPal 等；具体为某商户开通哪些、对应费率多少，以对接群 / 管理员确认为准。</p>
           </div>
 
           <div class="card">
@@ -1000,6 +1000,12 @@ $jsonData = json_encode($params);
                   <td>String</td>
                   <td>否</td>
                   <td>扩展参数，回调时原样返回，最大2048位</td>
+                </tr>
+                <tr>
+                  <td><code>wayCode</code></td>
+                  <td>String</td>
+                  <td>否</td>
+                  <td>支付方式代码。可选值：<code>cashapp</code>、<code>applepay</code>、<code>googlepay</code>、<code>paypal</code>。不传则由收银台让用户自行选择</td>
                 </tr>
               </tbody>
             </table>
